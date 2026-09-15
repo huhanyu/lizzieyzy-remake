@@ -1,8 +1,37 @@
-# LizzieYzy Next
+# LizzieYzy Remake
 
-LizzieYzy Next is the in-progress next-generation desktop architecture for the LizzieYzy Go review application. The new line is being built in parallel with the existing Java/Swing maintenance line, using Tauri 2, Rust, and TypeScript so SGF handling, KataGo analysis, engine setup, and local persistence can be tested in smaller modules.
+**基于 LizzieYzy 的现代桌面重制版。** 使用 Tauri 2、Rust、React 和 TypeScript 重建围棋复盘工作区，延续 Lizzie / LizzieYzy 的棋盘交互与 KataGo 分析体验。应用窗口目前仍使用 **LizzieYzy Next** 名称。
 
-This repository currently contains a functional Next workspace that can be built and run locally, not a published full-parity replacement for the legacy application. The Java/Swing line remains the stable user-facing release path while the Tauri app gains coverage and parity.
+本仓库是持续开发中的重制版本，不代表原项目官方发布，也尚未实现 Java 版的全部功能。
+
+## 界面预览
+
+### 棋盘与复盘工作区
+
+以正方形棋盘为主，左侧显示可关闭的落子树，右侧保留候选点和复盘模块。
+
+![棋盘、落子树与分析面板](docs/images/workspace.png)
+
+*当前浏览器预览截图：回放已记录的真实 KataGo 结果；浏览器本身不运行引擎。该样例没有完整逐手分析数据，因此问题手区域显示分析覆盖率，而非演示统计。*
+
+### 一键设置
+
+按使用场景选择配置，管理本地引擎与模型，并检测设备和资源状态。
+
+![桌面端一键设置](docs/images/one-click-setup.jpg)
+
+*桌面端一键设置验收截图；具体模型与可用后端取决于设备和已安装资源。*
+
+## 本次重制的主要功能
+
+- **棋谱与分支**：SGF 导入、保存、编辑与回放；落子树、主分支设置、偏离主线自动试下及返回。
+- **棋盘交互**：滚轮前进后退、候选点颜色、悬停变化预览、棋谱下一手标记；可单独隐藏棋盘上的推荐点，保留右侧列表。
+- **引擎分析**：本地 KataGo、智子云与远程引擎配置；实时分析、全盘分析、独立本地后台 1v 补线。
+- **五个复盘模块**：测评、吻合度、走势、问题手、发挥水准。走势整合胜率与目差；统计显示分析覆盖率，点击相关手数可跳转局面。
+- **本地棋力测评**：迁移 Java 端 XGBoost 20TUN 模型与特征计算，在本地进行推理；模型结果用于复盘参考。
+- **腾讯／野狐棋谱入口**：账号或 UID 查询、列表分页、棋谱 ID 或链接导入。外部服务真实账号下载流程仍需进一步验证。
+
+下文保留基础工程、开发和发布说明；历史版本记录不等同于本仓库已经发布的安装包。
 
 ## Current Status
 
@@ -152,10 +181,17 @@ The production release workflow is `.github/workflows/release.yml`. It runs on `
 - [Release checklist](docs/RELEASE_CHECKLIST.md)
 - [Troubleshooting](docs/TROUBLESHOOTING.md)
 
-## Acknowledgements
+## 致谢与参考来源
 
-- Original project: [yzyray/lizzieyzy](https://github.com/yzyray/lizzieyzy)
-- KataGo: [lightvector/KataGo](https://github.com/lightvector/KataGo)
-- Historical Fox references:
-  - [yzyray/FoxRequest](https://github.com/yzyray/FoxRequest)
-  - [FuckUbuntu/Lizzieyzy-Helper](https://github.com/FuckUbuntu/Lizzieyzy-Helper)
+感谢以下项目的作者和维护者。本项目沿用或参考其工作，并保留相关来源说明；各上游代码、模型与资源的权利及许可归原项目所有。
+
+| 项目 | 参考与复用内容 |
+| --- | --- |
+| [yzyray/lizzieyzy](https://github.com/yzyray/lizzieyzy) | 重制所基于的原始 LizzieYzy 项目与围棋复盘交互。 |
+| [wimi321/lizzieyzy-next](https://github.com/wimi321/lizzieyzy-next) | Java 维护版本；棋力评估模型、特征计算、吻合度与发挥水准统计的迁移参考。 |
+| [wimi321/lizzieyzy-next-tauri](https://github.com/wimi321/lizzieyzy-next-tauri) | Tauri / Rust / TypeScript 桌面重构工程基础。 |
+| [lightvector/KataGo](https://github.com/lightvector/KataGo) | 围棋分析引擎、分析协议与神经网络模型生态。 |
+| [yzyray/FoxRequest](https://github.com/yzyray/FoxRequest) | 野狐棋谱请求相关参考。 |
+| [FuckUbuntu/Lizzieyzy-Helper](https://github.com/FuckUbuntu/Lizzieyzy-Helper) | 历史野狐接入辅助实现参考。 |
+
+同时感谢 [涨棋网](https://zhangqi.com.cn/) 的产品设计启发：推荐选点配色，以及测评、吻合度、走势、问题手、发挥水准的展示形式。这里的参考指界面和交互设计，不表示复用了其服务端代码或私有评估模型。

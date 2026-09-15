@@ -1,0 +1,37 @@
+{
+  "engine": "KataGo v1.18.2 Metal",
+  "model": "/Users/ice/.lizzieyzy-dev/models/kata1-tf2-b10c384-s2941M-d5872M.bin.gz",
+  "independentSequentialProcesses": true,
+  "results": [
+    {
+      "name": "a",
+      "id": "p2-queue-a",
+      "returncode": 0,
+      "turns": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "ownership": 81,
+      "policy": 82,
+      "seconds": 0.8,
+      "minimumVisits": 8
+    },
+    {
+      "name": "b",
+      "id": "p2-queue-b",
+      "returncode": 0,
+      "turns": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "ownership": 81,
+      "policy": 82,
+      "seconds": 0.97,
+      "minimumVisits": 8
+    }
+  ]
+}

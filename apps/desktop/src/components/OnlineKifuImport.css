@@ -1,0 +1,71 @@
+.online-kifu-dialog {
+  padding: 0;
+  border: 1px solid #46545d;
+  border-radius: 12px;
+  background: #222d33;
+  color: #dbe5e9;
+  width: min(800px, 92vw);
+  max-height: 85vh;
+  box-shadow: 0 16px 60px #0007;
+}
+.online-kifu-dialog::backdrop {
+  background: #0005;
+}
+.online-kifu-dialog > section {
+  padding: 20px;
+}
+.online-kifu-dialog header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.online-kifu-dialog h2 {
+  margin: 0;
+  font-size: 18px;
+}
+.online-kifu-controls {
+  display: flex;
+  gap: 8px;
+  margin: 10px 0;
+}
+.online-kifu-controls input {
+  flex: 1;
+  min-width: 0;
+}
+.online-kifu-dialog input,
+.online-kifu-dialog select,
+.online-kifu-dialog button {
+  background: #293a43;
+  color: #dbe5e9;
+  border: 1px solid #4a5b65;
+  border-radius: 5px;
+  padding: 8px;
+}
+.online-kifu-dialog button:disabled {
+  opacity: 0.45;
+}
+.online-kifu-dialog p {
+  font-size: 12px;
+  color: #aebfc8;
+}
+.online-kifu-list {
+  max-height: 48vh;
+  overflow: auto;
+}
+.online-kifu-list table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.online-kifu-list td,
+.online-kifu-list th {
+  padding: 9px 6px;
+  text-align: left;
+  border-bottom: 1px solid #3a4a53;
+}
+.online-kifu-list th {
+  position: sticky;
+  top: 0;
+  background: #222d33;
+}

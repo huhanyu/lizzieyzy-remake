@@ -1,0 +1,114 @@
+{
+  "engine": "/opt/homebrew/bin/katago",
+  "model": "/Users/ice/.lizzieyzy-dev/models/kata1-tf2-b10c384-s2941M-d5872M.bin.gz",
+  "checks": [
+    {
+      "command": "protocol_version",
+      "ack": "=1 2"
+    },
+    {
+      "command": "boardsize 9",
+      "ack": "=2"
+    },
+    {
+      "command": "clear_board",
+      "ack": "=3"
+    },
+    {
+      "command": "kata-set-param numSearchThreads 2",
+      "ack": "=4"
+    },
+    {
+      "command": "kata-get-param numSearchThreads",
+      "ack": "=5 2"
+    },
+    {
+      "command": "kata-set-param analysisWideRootNoise 0.04",
+      "ack": "=6"
+    },
+    {
+      "command": "kata-get-param analysisWideRootNoise",
+      "ack": "=7 0.04"
+    },
+    {
+      "command": "kata-set-param playoutDoublingAdvantage 0.1",
+      "ack": "=8"
+    },
+    {
+      "command": "kata-get-param playoutDoublingAdvantage",
+      "ack": "=9 0.1"
+    },
+    {
+      "command": "kata-analyze B 10 ownership true rootInfo true allow B D4 1",
+      "ack": "=10"
+    },
+    {
+      "command": "stop",
+      "ack": "=11"
+    },
+    {
+      "mode": "allow",
+      "frames": 16,
+      "candidateMoves": [
+        "D4"
+      ],
+      "noFramesAfterStopAck": true
+    },
+    {
+      "command": "kata-analyze B 10 ownership true rootInfo true avoid B D4 1",
+      "ack": "=12"
+    },
+    {
+      "command": "stop",
+      "ack": "=13"
+    },
+    {
+      "mode": "avoid",
+      "frames": 19,
+      "candidateMoves": [
+        "C3",
+        "C4",
+        "C5",
+        "C6",
+        "C7",
+        "D3",
+        "D5",
+        "D6",
+        "D7",
+        "E3",
+        "E4",
+        "E5",
+        "E6",
+        "E7",
+        "F3",
+        "F4",
+        "F5",
+        "F6",
+        "F7",
+        "G3",
+        "G4",
+        "G5",
+        "G6",
+        "G7"
+      ],
+      "noFramesAfterStopAck": true
+    },
+    {
+      "command": "kata-analyze W 10 ownership true rootInfo true",
+      "ack": "=14"
+    },
+    {
+      "command": "stop",
+      "ack": "=15"
+    },
+    {
+      "resumeSameProcessFrames": 5
+    },
+    {
+      "command": "quit",
+      "ack": "=16"
+    }
+  ],
+  "passed": true,
+  "exitCode": 0
+}

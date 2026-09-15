@@ -1,0 +1,16 @@
+{
+  "round": 2,
+  "runtime": "Tauri native IPC, not browser fallback",
+  "report_sha256": "82fb665a3505bfa1a7cee3113cd005381083dd6efb2a69400ccae6f0932e9727",
+  "checks_passed": 8,
+  "checks_total": 8,
+  "elapsed_ms": 13208,
+  "frame_count": 73,
+  "ended": [
+    {
+      "job_id": "3f2909b4-0287-4e88-a190-d5ce37219997",
+      "generation": 25,
+      "reason": "engine rejected ?122 Could not parse vertex: 'Z99'"
+    }
+  ]
+}

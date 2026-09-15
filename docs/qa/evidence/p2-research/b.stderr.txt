@@ -1,0 +1,26 @@
+2026-09-14 23:33:31+0800: Running with following config:
+logAllRequests = false
+logAllResponses = false
+nnMaxBatchSize = 4
+numAnalysisThreads = 1
+numSearchThreads = 1
+reportAnalysisWinratesAs = BLACK
+
+2026-09-14 23:33:31+0800: Analysis Engine starting...
+2026-09-14 23:33:31+0800: KataGo v1.18.2
+2026-09-14 23:33:31+0800: nnRandSeed0 = 10475006890663903932
+2026-09-14 23:33:31+0800: After dedups: nnModelFile0 = /Users/ice/.lizzieyzy-dev/models/kata1-tf2-b10c384-s2941M-d5872M.bin.gz useFP16 auto
+2026-09-14 23:33:31+0800: Initializing neural net buffer to be size 19 * 19 allowing smaller boards
+Metal backend 0: GPU mode - using MPSGraph (GPU)
+Metal backend: MPSGraph initialized on Apple M5 Pro
+Metal backend 0: Initialized MPSGraph GPU-only mode
+2026-09-14 23:33:31+0800: Loaded config /Users/ice/Documents/New project/lizzieyzy-next-tauri/docs/qa/evidence/p2-research/analysis.cfg
+2026-09-14 23:33:31+0800: Loaded model /Users/ice/.lizzieyzy-dev/models/kata1-tf2-b10c384-s2941M-d5872M.bin.gz
+2026-09-14 23:33:31+0800: Analyzing up to 1 positions at a time in parallel
+2026-09-14 23:33:31+0800: Started, ready to begin handling requests
+2026-09-14 23:33:32+0800: /Users/ice/.lizzieyzy-dev/models/kata1-tf2-b10c384-s2941M-d5872M.bin.gz
+2026-09-14 23:33:32+0800: NN rows: 32
+2026-09-14 23:33:32+0800: NN batches: 32
+2026-09-14 23:33:32+0800: NN avg batch size: 1
+2026-09-14 23:33:32+0800: GPU -1 finishing, processed 32 rows 32 batches
+2026-09-14 23:33:32+0800: All cleaned up, quitting

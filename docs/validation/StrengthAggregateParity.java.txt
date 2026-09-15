@@ -1,0 +1,29 @@
+package featurecat.lizzie.analysis;
+import org.json.*;
+import java.util.*;
+import featurecat.lizzie.rules.Stone;
+public class AggregateParity {
+ public static void main(String[] args)throws Exception {
+  Class<?> c=Class.forName("featurecat.lizzie.analysis.PlayerStrengthEstimator$Accumulator");
+  var ac=c.getDeclaredConstructor();ac.setAccessible(true);
+  var sc=PlayerStrengthEstimator.Sample.class.getDeclaredConstructors()[0];sc.setAccessible(true);
+  var add=c.getDeclaredMethod("add",PlayerStrengthEstimator.Sample.class);add.setAccessible(true);
+  var report=c.getDeclaredMethod("toReport",PlayerStrengthEstimator.StrengthModel.class);report.setAccessible(true);
+  JSONArray out=new JSONArray();
+  for(int run=0;run<4;run++){
+   Object acc=ac.newInstance();JSONArray moves=new JSONArray();
+   for(int i=0;i<70;i++){
+    int turn=i*3+1,rank=i%7==0?999:i%5;double loss=((i*17+run*11)%100)/10.0,win=loss*3,complexity=(i%11)/10.0,weight=Math.max(.05,Math.min(1,Math.max(complexity,loss/4)));
+    Optional<Double> score=i%9==0?Optional.empty():Optional.of(loss); if(score.isEmpty())win=loss*6;
+    var cat=loss<.2?PlayerStrengthEstimator.MoveCategory.EXCELLENT:loss<.6?PlayerStrengthEstimator.MoveCategory.GREAT:loss<1.2?PlayerStrengthEstimator.MoveCategory.GOOD:loss<4?PlayerStrengthEstimator.MoveCategory.INACCURACY:loss<10?PlayerStrengthEstimator.MoveCategory.MISTAKE:PlayerStrengthEstimator.MoveCategory.BLUNDER;
+    var quality=MoveRankDefinition.classifyLosses(win,score,null);
+    Object sample=sc.newInstance(Stone.BLACK,turn,"A1",win,score,rank==0,rank,cat,quality,loss,complexity,weight);add.invoke(acc,sample);
+    JSONObject s=new JSONObject().put("rank",rank).put("first",rank==0).put("loss",loss).put("scoreLoss",score.isPresent()?score.get():JSONObject.NULL).put("winrateLoss",win).put("complexity",complexity).put("weight",weight).put("quality",quality.ordinal()).put("visits",100);
+    moves.put(new JSONObject().put("turn",turn).put("strength",s));
+   }
+   var r=(PlayerStrengthEstimator.SideReport)report.invoke(acc,PlayerStrengthEstimator.StrengthModel.XGBOOST20TUN);
+   out.put(new JSONObject().put("moves",moves).put("prediction",r.rankValue).put("match",r.matchRate).put("good",r.goodMoveRate));
+  }
+  System.out.println(out);
+ }
+}

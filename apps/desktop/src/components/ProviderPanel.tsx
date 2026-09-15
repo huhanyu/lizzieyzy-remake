@@ -1,0 +1,1013 @@
+import { useState } from "react";
+import {
+  fetchFoxProvider,
+  fetchYikeProvider,
+  importProviderPayload,
+  parseYikeUrl,
+  previewLegacyImportCaptureHelper,
+  probeReadboardSidecar,
+  syncReadboardSidecarSnapshot
+} from "../api/providers";
+import {
+  emptyProviderMetadata,
+  providerLabel,
+  yikeRoomKindLabel,
+  type ProviderFetchRequest,
+  type ProviderFetchResult,
+  type ProviderGameMetadata,
+  type ProviderImportRequest,
+  type ProviderImportResult,
+  type ProviderKind,
+  type LegacyImportCaptureHelperKind,
+  type LegacyImportCaptureHelperResult,
+  type ReadboardSidecarProbeResult,
+  type ReadboardSidecarSyncSnapshotResult,
+  type YikeUrlDescriptor
+} from "../domain/providers";
+import type { PlayerColor, PositionDto, StoneDto } from "../domain/types";
+
+type Props = {
+  disabled?: boolean;
+  onImport: (result: ProviderImportResult) => void | Promise<void>;
+};
+
+type OperationStatus = {
+  preview: string;
+  fetch: string;
+  import: string;
+  readboardProbe: string;
+  readboardSync: string;
+  legacyHelper: string;
+};
+
+type FoxFetchInput = {
+  url: string;
+  sourceUrl: string | null;
+  sourceId: string | null;
+};
+
+type ReadboardPreviewKind = "none" | "protocol" | "image_path" | "image_base64";
+
+const providerFetchTimeoutMs = 15_000;
+const readboardTimeoutMs = 5_000;
+
+const initialStatuses: OperationStatus = {
+  preview: "Yike URL preview ready.",
+  fetch: "Provider fetch ready.",
+  import: "Payload import ready.",
+  readboardProbe: "Readboard probe ready.",
+  readboardSync: "Protocol snapshot preview ready.",
+  legacyHelper: "Legacy helper status ready."
+};
+
+export function ProviderPanel({ disabled = false, onImport }: Props) {
+  const [provider, setProvider] = useState<ProviderKind>("yike");
+  const [sourceUrl, setSourceUrl] = useState("");
+  const [payload, setPayload] = useState("");
+  const [descriptor, setDescriptor] = useState<YikeUrlDescriptor | null>(null);
+  const [statuses, setStatuses] = useState<OperationStatus>(initialStatuses);
+  const [readboardEndpoint, setReadboardEndpoint] = useState("");
+  const [readboardProtocolLine, setReadboardProtocolLine] = useState("");
+  const [readboardImagePath, setReadboardImagePath] = useState("");
+  const [readboardImageBase64, setReadboardImageBase64] = useState("");
+  const [readboardImageName, setReadboardImageName] = useState("");
+  const [readboardProbeResult, setReadboardProbeResult] = useState<ReadboardSidecarProbeResult | null>(null);
+  const [readboardSyncResult, setReadboardSyncResult] = useState<ReadboardSidecarSyncSnapshotResult | null>(null);
+  const [readboardPreviewKind, setReadboardPreviewKind] = useState<ReadboardPreviewKind>("none");
+  const [readboardPreviewError, setReadboardPreviewError] = useState("");
+  const [readboardImportConfirmed, setReadboardImportConfirmed] = useState(false);
+  const [legacyHelperResult, setLegacyHelperResult] = useState<LegacyImportCaptureHelperResult | null>(null);
+  const [providerWarnings, setProviderWarnings] = useState<string[]>([]);
+  const canPreviewYike = !disabled && provider === "yike" && sourceUrl.trim().length > 0;
+  const canFetchYike = !disabled && provider === "yike" && descriptor !== null;
+  const canFetchFox = !disabled && provider === "fox" && sourceUrl.trim().length > 0;
+  const canImport = !disabled && payload.trim().length > 0;
+  const canProbeReadboard = !disabled;
+  const canSyncReadboard = !disabled && readboardProtocolLine.trim().length > 0;
+  const canPreviewReadboardImage = !disabled && (readboardImagePath.trim().length > 0 || readboardImageBase64.trim().length > 0);
+  const canConfirmReadboardImport = !disabled && readboardSyncResult?.position != null;
+  const canImportReadboardSnapshot = canConfirmReadboardImport && readboardImportConfirmed;
+  const headerStatus = statuses.fetch !== initialStatuses.fetch
+    ? statuses.fetch
+    : statuses.import !== initialStatuses.import
+      ? statuses.import
+      : provider === "yike"
+        ? statuses.preview
+        : "Fox fetch ready.";
+
+  function handleProviderChange(nextProvider: ProviderKind) {
+    setProvider(nextProvider);
+    setDescriptor(null);
+    setProviderWarnings([]);
+    setOperationStatus("preview", nextProvider === "yike" ? "Yike URL preview ready." : "Fox accepts chessid or provider command input.");
+    setOperationStatus("fetch", `${providerLabel(nextProvider)} fetch ready.`);
+    setOperationStatus("import", `${providerLabel(nextProvider)} payload import ready.`);
+  }
+
+  async function handlePreviewYikeUrl() {
+    if (!canPreviewYike) return;
+    setOperationStatus("preview", "Previewing Yike URL...");
+    try {
+      const nextDescriptor = await parseYikeUrl(sourceUrl);
+      setDescriptor(nextDescriptor);
+      setProviderWarnings([]);
+      setOperationStatus("preview", `${yikeRoomKindLabel(nextDescriptor.room_kind)} descriptor ready.`);
+    } catch (error) {
+      setDescriptor(null);
+      setProviderWarnings([]);
+      setOperationStatus("preview", `URL preview failed: ${errorMessage(error)}`);
+    }
+  }
+
+  async function handleFetchYikeAndImport() {
+    if (!canFetchYike || descriptor === null) return;
+    setOperationStatus("fetch", "Fetching Yike payload...");
+    try {
+      const result = await fetchYikeProvider(buildYikeFetchRequest(descriptor, sourceUrl));
+      await importFetchedPayload(result, sourceUrl.trim() || descriptor.request_url, descriptor.id);
+      setOperationStatus("fetch", providerFetchStatus(result, "Yike"));
+    } catch (error) {
+      setProviderWarnings([]);
+      setOperationStatus("fetch", `Yike fetch failed: ${errorMessage(error)}`);
+    }
+  }
+
+  async function handleFetchFoxAndImport() {
+    if (!canFetchFox) return;
+    try {
+      const foxInput = normalizeFoxFetchInput(sourceUrl);
+      setOperationStatus("fetch", "Fetching Fox payload...");
+      const result = await fetchFoxProvider(buildFoxFetchRequest(foxInput));
+      await importFetchedPayload(result, foxInput.sourceUrl, foxInput.sourceId);
+      setOperationStatus("fetch", providerFetchStatus(result, "Fox"));
+    } catch (error) {
+      setProviderWarnings([]);
+      setOperationStatus("fetch", `Fox fetch failed: ${errorMessage(error)}`);
+    }
+  }
+
+  async function handleImport() {
+    if (!canImport) return;
+    setOperationStatus("import", "Importing provider payload...");
+    try {
+      const result = await importProviderPayload(buildRequest(provider, payload, sourceUrl, descriptor));
+      await onImport(result);
+      setProviderWarnings(result.warnings);
+      setOperationStatus("import", importStatus(result));
+    } catch (error) {
+      setProviderWarnings([]);
+      setOperationStatus("import", `Import failed: ${errorMessage(error)}`);
+    }
+  }
+
+  async function handleReadboardProbe() {
+    if (!canProbeReadboard) return;
+    setOperationStatus("readboardProbe", "Probing readboard sidecar...");
+    try {
+      const result = await probeReadboardSidecar({
+        endpoint: optionalTrimmed(readboardEndpoint),
+        timeout_ms: readboardTimeoutMs
+      });
+      setReadboardProbeResult(result);
+      setOperationStatus("readboardProbe", result.available ? "Readboard sidecar available." : "Readboard sidecar unavailable.");
+    } catch (error) {
+      setReadboardProbeResult(null);
+      setOperationStatus("readboardProbe", `Readboard probe failed: ${errorMessage(error)}`);
+    }
+  }
+
+  async function handleReadboardSync() {
+    if (!canSyncReadboard) return;
+    setOperationStatus("readboardSync", "Previewing protocol snapshot...");
+    resetReadboardPreviewState();
+    try {
+      const result = await syncReadboardSidecarSnapshot({
+        endpoint: optionalTrimmed(readboardEndpoint),
+        sgf_text: readboardProtocolLine.trim(),
+        metadata: { source: "provider_panel", input: "protocol_line" },
+        timeout_ms: readboardTimeoutMs
+      });
+      setReadboardSyncResult(result);
+      setReadboardPreviewKind("protocol");
+      setReadboardPreviewError("");
+      setOperationStatus("readboardSync", readboardSyncStatus(result));
+    } catch (error) {
+      setReadboardSyncResult(null);
+      setReadboardPreviewKind("protocol");
+      setReadboardPreviewError(errorMessage(error));
+      setOperationStatus("readboardSync", `Readboard preview failed recoverably: ${errorMessage(error)} No SGF was imported and the board was not replaced.`);
+    }
+  }
+
+  async function handleReadboardImagePreview() {
+    if (!canPreviewReadboardImage) return;
+    setOperationStatus("readboardSync", "Previewing controlled board image import...");
+    resetReadboardPreviewState();
+    try {
+      const hasPath = readboardImagePath.trim().length > 0;
+      const result = await syncReadboardSidecarSnapshot({
+        endpoint: optionalTrimmed(readboardEndpoint),
+        image_path: hasPath ? readboardImagePath.trim() : null,
+        image_base64: hasPath ? null : cleanImageBase64(readboardImageBase64),
+        metadata: {
+          source: "provider_panel",
+          input: hasPath ? "controlled_image_path" : "controlled_image_base64",
+          scope: "controlled_board_image_import_mvp",
+          file_name: readboardImageName
+        },
+        timeout_ms: readboardTimeoutMs
+      });
+      setReadboardSyncResult(result);
+      setReadboardPreviewKind(hasPath ? "image_path" : "image_base64");
+      setReadboardPreviewError("");
+      setOperationStatus("readboardSync", readboardImagePreviewStatus(result));
+    } catch (error) {
+      setReadboardSyncResult(null);
+      setReadboardPreviewKind(readboardImagePath.trim().length > 0 ? "image_path" : "image_base64");
+      setReadboardPreviewError(errorMessage(error));
+      setOperationStatus("readboardSync", `Controlled board image preview failed recoverably: ${errorMessage(error)} No SGF was imported and the board was not replaced.`);
+    }
+  }
+
+  async function handleReadboardImageFile(file: File | null) {
+    if (!file) return;
+    setReadboardImageName(file.name);
+    setReadboardImagePath("");
+    resetReadboardPreviewState();
+    setOperationStatus("readboardSync", `Loaded ${file.name} for controlled board image preview. Use Preview image before importing.`);
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      setReadboardImageBase64(cleanImageBase64(dataUrl));
+    } catch (error) {
+      setReadboardImageBase64("");
+      setOperationStatus("readboardSync", `Image selection failed: ${errorMessage(error)}`);
+    }
+  }
+
+  async function handleImportReadboardSnapshot() {
+    if (!readboardSyncResult?.position || !readboardImportConfirmed) return;
+    setOperationStatus("readboardSync", "Importing readboard snapshot...");
+    try {
+      const result = buildReadboardSnapshotImportResult(readboardSyncResult, optionalTrimmed(readboardEndpoint));
+      await onImport(result);
+      setReadboardImportConfirmed(false);
+      setOperationStatus("readboardSync", readboardSnapshotImportStatus(result));
+    } catch (error) {
+      setOperationStatus("readboardSync", `Readboard snapshot import failed: ${errorMessage(error)}`);
+    }
+  }
+
+  async function handleLegacyHelperStatus(kind: LegacyImportCaptureHelperKind) {
+    setOperationStatus("legacyHelper", legacyHelperPendingStatus(kind));
+    try {
+      const result = await previewLegacyImportCaptureHelper({
+        kind,
+        payload: kind === "sgf_payload" ? payload : kind === "protocol_snapshot" ? readboardProtocolLine : null,
+        metadata: { source: "provider_panel_legacy_helper_surface" }
+      });
+      setLegacyHelperResult(result);
+      setOperationStatus("legacyHelper", legacyHelperStatus(result));
+    } catch (error) {
+      setLegacyHelperResult({
+        kind,
+        status: "recoverable_unsupported",
+        title: "Legacy helper unavailable",
+        message: `Helper status failed: ${errorMessage(error)}. No SGF was imported and the board was not replaced.`,
+        recoverable: true,
+        imported: false,
+        boardReplacement: "none",
+        warnings: ["No stale, guessed, or partial board replacement was applied."],
+        details: { no_stale_board_replacement: "true" }
+      });
+      setOperationStatus("legacyHelper", "Legacy helper status unavailable; no import performed.");
+    }
+  }
+
+  async function importFetchedPayload(result: ProviderFetchResult, fallbackSourceUrl: string | null, fallbackSourceId: string | null) {
+    setPayload(result.payload);
+    setOperationStatus("import", `Importing fetched ${providerLabel(result.provider)} payload...`);
+    const imported = await importProviderPayload(buildFetchImportRequest(result, fallbackSourceUrl, fallbackSourceId));
+    await onImport(imported);
+    setProviderWarnings([...result.warnings, ...imported.warnings]);
+    setOperationStatus("import", importStatus(imported));
+  }
+
+  function setOperationStatus(operation: keyof OperationStatus, status: string) {
+    setStatuses((current) => ({ ...current, [operation]: status }));
+  }
+
+  function resetReadboardPreviewState() {
+    setReadboardSyncResult(null);
+    setReadboardPreviewError("");
+    setReadboardPreviewKind("none");
+    setReadboardImportConfirmed(false);
+  }
+
+  return (
+    <section className="provider-panel" aria-label="Provider import" data-testid="provider-panel">
+      <div className="provider-header">
+        <h2>外部对局导入与同步</h2>
+        <span title={headerStatus}>{headerStatus}</span>
+      </div>
+      <div className="provider-grid">
+        <label>
+          <span>对局来源</span>
+          <select data-testid="provider-source-select" value={provider} disabled={disabled} onChange={(event) => handleProviderChange(event.target.value as ProviderKind)}>
+            <option value="yike">弈客围棋 (Yike)</option>
+            <option value="fox">腾讯野狐 (Fox)</option>
+          </select>
+        </label>
+        <button data-testid="provider-preview" onClick={() => void handlePreviewYikeUrl()} disabled={!canPreviewYike}>解析链接</button>
+      </div>
+      <label>
+        <span>{provider === "yike" ? "对局链接 / 房间 URL" : "对局编号 / 指令 (chessid)"}</span>
+        <input
+          data-testid="provider-source-input"
+          value={sourceUrl}
+          disabled={disabled}
+          placeholder={provider === "yike" ? "输入弈客直播室或对局室链接" : "输入 123456, chessid 123456 或用户名"}
+          onChange={(event) => {
+            setSourceUrl(event.target.value);
+            setDescriptor(null);
+            setProviderWarnings([]);
+          }}
+        />
+      </label>
+      <p className="provider-status" title={statuses.preview}>{statuses.preview}</p>
+      {descriptor ? (
+        <dl className="provider-preview">
+          <div>
+            <dt>类型</dt>
+            <dd>{yikeRoomKindLabel(descriptor.room_kind)}</dd>
+          </div>
+          <div>
+            <dt>ID</dt>
+            <dd>{descriptor.id}</dd>
+          </div>
+          <div>
+            <dt>请求地址</dt>
+            <dd title={descriptor.request_url}>{descriptor.request_url}</dd>
+          </div>
+        </dl>
+      ) : null}
+      <button data-testid="provider-fetch-import" onClick={() => void (provider === "yike" ? handleFetchYikeAndImport() : handleFetchFoxAndImport())} disabled={provider === "yike" ? !canFetchYike : !canFetchFox}>
+        抓取并导入
+      </button>
+      <p className="provider-status" title={statuses.fetch}>{statuses.fetch}</p>
+      <label className="provider-payload-label">
+        <span>棋谱内容 / SGF 文本</span>
+        <textarea
+          data-testid="provider-payload-textarea"
+          className="provider-payload"
+          value={payload}
+          disabled={disabled}
+          spellCheck={false}
+          aria-label="Provider payload or SGF"
+          placeholder='粘贴原始 SGF 文本，或包含 "sgf"、"clean_sgf"、"chess" 的 JSON 数据。'
+          onChange={(event) => {
+            setPayload(event.target.value);
+            setProviderWarnings([]);
+          }}
+        />
+      </label>
+      <button data-testid="provider-import-payload" onClick={() => void handleImport()} disabled={!canImport}>导入粘贴的内容</button>
+      <p className="provider-status" title={statuses.import}>{statuses.import}</p>
+      <WarningList label="导入提示与警告" warnings={providerWarnings} />
+
+      <div className="provider-readboard" data-testid="controlled-board-image-import-mvp">
+        <div className="provider-subheader">
+          <h3>Readboard 棋盘识别与快照同步</h3>
+          <span title={statuses.readboardProbe}>{statuses.readboardProbe}</span>
+        </div>
+        <p className="provider-status">
+          棋盘图像解析支持传入棋盘图片、本地文件路径或 Base64 编码，并在导入前预览提取的当前盘面。
+        </p>
+        <div className="provider-grid">
+          <label>
+            <span>服务接口 (Endpoint)</span>
+            <input
+              data-testid="readboard-endpoint-input"
+              value={readboardEndpoint}
+              disabled={disabled}
+              placeholder="选填 Sidecar 接口地址"
+              onChange={(event) => setReadboardEndpoint(event.target.value)}
+            />
+          </label>
+          <button data-testid="readboard-probe" onClick={() => void handleReadboardProbe()} disabled={!canProbeReadboard}>探测服务</button>
+        </div>
+        {readboardProbeResult ? (
+          <dl className="provider-preview">
+            <div>
+              <dt>状态</dt>
+              <dd>{readboardProbeResult.available ? "可用" : "不可用"}</dd>
+            </div>
+            <div>
+              <dt>接口</dt>
+              <dd title={readboardProbeResult.endpoint ?? ""}>{readboardProbeResult.endpoint ?? "默认"}</dd>
+            </div>
+            <div>
+              <dt>版本</dt>
+              <dd>{readboardProbeResult.version ?? "未知"}</dd>
+            </div>
+            <div>
+              <dt>警告</dt>
+              <dd title={readboardProbeResult.warnings.join("; ")}>{warningCount(readboardProbeResult.warnings)}</dd>
+            </div>
+          </dl>
+        ) : null}
+        <WarningList label="Readboard 服务警告" warnings={readboardProbeResult?.warnings ?? []} />
+        <div className="provider-subheader">
+          <h4>棋盘图像精准解析</h4>
+          <span data-testid="readboard-image-import-status" title={statuses.readboardSync}>{statuses.readboardSync}</span>
+        </div>
+        <div className="provider-grid">
+          <label>
+            <span>本地图片路径</span>
+            <input
+              data-testid="readboard-image-path-input"
+              value={readboardImagePath}
+              disabled={disabled}
+              placeholder="桌面端棋盘图片文件路径"
+              onChange={(event) => {
+                setReadboardImagePath(event.target.value);
+                if (event.target.value.trim()) setReadboardImageBase64("");
+                resetReadboardPreviewState();
+              }}
+            />
+          </label>
+          <label className="file-button">
+            选择图片
+            <input
+              data-testid="readboard-image-file-input"
+              type="file"
+              accept="image/*"
+              disabled={disabled}
+              onChange={(event) => {
+                void handleReadboardImageFile(event.target.files?.[0] ?? null);
+                event.currentTarget.value = "";
+              }}
+            />
+          </label>
+        </div>
+        <label className="provider-payload-label">
+          <span>图片 Base64 编码</span>
+          <textarea
+            data-testid="readboard-image-base64-textarea"
+            className="provider-payload provider-readboard-line"
+            value={readboardImageBase64}
+            disabled={disabled}
+            spellCheck={false}
+            aria-label="Controlled board image base64"
+            placeholder="粘贴棋盘图片的 Data URL 或 Base64 字符串。导入前需先预览确认。"
+            onChange={(event) => {
+              setReadboardImageBase64(event.target.value);
+              if (event.target.value.trim()) setReadboardImagePath("");
+              resetReadboardPreviewState();
+            }}
+          />
+        </label>
+        <div className="provider-grid">
+          <button data-testid="readboard-preview-image" onClick={() => void handleReadboardImagePreview()} disabled={!canPreviewReadboardImage}>预览图片识别</button>
+          <button data-testid="readboard-import-image-snapshot" onClick={() => void handleImportReadboardSnapshot()} disabled={!canImportReadboardSnapshot}>确认并导入预览局面</button>
+        </div>
+        <p className="provider-status" data-testid="readboard-image-boundary">
+          图片导入仅提取预览中的当前局面。预览失败时安全回退，不会替换当前棋盘。
+        </p>
+        <label className="provider-payload-label">
+          <span>快照协议指令行</span>
+          <textarea
+            data-testid="readboard-protocol-textarea"
+            className="provider-payload provider-readboard-line"
+            value={readboardProtocolLine}
+            disabled={disabled}
+            spellCheck={false}
+            aria-label="Readboard protocol preview line"
+            placeholder="粘贴 Readboard 快照协议文本以预览局面"
+            onChange={(event) => {
+              setReadboardProtocolLine(event.target.value);
+              resetReadboardPreviewState();
+            }}
+          />
+        </label>
+        <div className="provider-grid">
+          <button data-testid="readboard-preview-snapshot" onClick={() => void handleReadboardSync()} disabled={!canSyncReadboard}>预览快照局面</button>
+          <button data-testid="readboard-import-snapshot" onClick={() => void handleImportReadboardSnapshot()} disabled={!canImportReadboardSnapshot}>确认并导入快照</button>
+        </div>
+        <p className="provider-status" title={statuses.readboardSync}>{statuses.readboardSync}</p>
+        {readboardPreviewError ? (
+          <div className="warning-list" role="alert" data-testid="readboard-preview-error">
+            <strong>预览失败（已安全保护）</strong>
+            <p>{readboardPreviewError}</p>
+            <small>未导入任何 SGF，当前棋盘未被替换。</small>
+          </div>
+        ) : null}
+        {readboardSyncResult ? (
+          <dl className="provider-preview" data-testid="readboard-snapshot-preview-summary">
+            <div>
+              <dt>快照 ID</dt>
+              <dd title={readboardSnapshotId(readboardSyncResult)}>{readboardSnapshotId(readboardSyncResult)}</dd>
+            </div>
+            <div>
+              <dt>哈希值</dt>
+              <dd title={readboardSnapshotHash(readboardSyncResult) ?? ""}>{readboardSnapshotHash(readboardSyncResult) ?? "未上报"}</dd>
+            </div>
+            <div>
+              <dt>路数</dt>
+              <dd>{readboardSyncResult.position ? `${readboardSyncResult.position.board_size}x${readboardSyncResult.position.board_size}` : "无"}</dd>
+            </div>
+            <div>
+              <dt>手数</dt>
+              <dd>{readboardSyncResult.position?.move_number ?? "未知"}</dd>
+            </div>
+            <div>
+              <dt>棋子数</dt>
+              <dd>{readboardSyncResult.position?.stones.length ?? 0}</dd>
+            </div>
+            <div>
+              <dt>置信度</dt>
+              <dd>{readboardConfidence(readboardSyncResult)}</dd>
+            </div>
+            <div>
+              <dt>落子方</dt>
+              <dd>{readboardSyncResult.position ? colorLabel(readboardSyncResult.position.to_play) : "未知"}</dd>
+            </div>
+            <div>
+              <dt>来源</dt>
+              <dd title={readboardSourceMetadata(readboardSyncResult, readboardPreviewKind).join("; ")}>{readboardPreviewSourceLabel(readboardPreviewKind)}</dd>
+            </div>
+            <div>
+              <dt>元数据</dt>
+              <dd title={readboardSourceMetadata(readboardSyncResult, readboardPreviewKind).join("; ")}>{readboardSourceMetadata(readboardSyncResult, readboardPreviewKind).slice(0, 3).join("; ")}</dd>
+            </div>
+            <div>
+              <dt>警告</dt>
+              <dd title={readboardSyncResult.warnings.join("; ")}>{warningCount(readboardSyncResult.warnings)}</dd>
+            </div>
+          </dl>
+        ) : null}
+        {readboardSyncResult ? (
+          <div className="migration-result" data-testid="readboard-import-confirmation">
+            <label className="toggle-row">
+              <span>确认导入当前局面</span>
+              <input
+                type="checkbox"
+                data-testid="readboard-confirm-import"
+                checked={readboardImportConfirmed}
+                disabled={!canConfirmReadboardImport}
+                onChange={(event) => setReadboardImportConfirmed(event.target.checked)}
+              />
+            </label>
+            <small>
+              勾选确认后才会将当前棋盘替换为快照局面的 SGF。不会重构完整对局历史。
+            </small>
+          </div>
+        ) : null}
+        <WarningList label="Readboard 快照警告" warnings={readboardSyncResult?.warnings ?? []} />
+      </div>
+
+      <section className="legacy-import-helper" aria-label="Legacy import and capture helpers" data-testid="legacy-import-capture-helper-surface">
+        <div className="provider-subheader">
+          <h3>旧版导入辅助工具</h3>
+          <span title={statuses.legacyHelper}>{statuses.legacyHelper}</span>
+        </div>
+        <div className="legacy-helper-grid">
+          <HelperCard
+            testId="legacy-helper-sgf-payload"
+            title="SGF/数据内容辅助"
+            status="available"
+            detail="在上方粘贴 SGF 或第三方 JSON，然后点击导入。"
+            actionLabel="查看数据路径"
+            disabled={disabled}
+            onAction={() => void handleLegacyHelperStatus("sgf_payload")}
+          />
+          <HelperCard
+            testId="legacy-helper-protocol-snapshot"
+            title="协议快照辅助"
+            status="available"
+            detail="粘贴 Readboard 协议指令，预览后勾选确认导入。"
+            actionLabel="查看快照路径"
+            disabled={disabled}
+            onAction={() => void handleLegacyHelperStatus("protocol_snapshot")}
+          />
+          <HelperCard
+            testId="legacy-helper-ocr-unsupported"
+            title="棋盘图像解析"
+            status="scoped MVP"
+            detail="请使用上方图片输入区域。全屏任意截图 OCR 暂不在此范围内。"
+            actionLabel="查看图片范围"
+            disabled={disabled}
+            onAction={() => void handleLegacyHelperStatus("image_ocr")}
+          />
+          <HelperCard
+            testId="legacy-helper-external-capture-unsupported"
+            title="外部窗口/客户端捕获"
+            status="recoverable unsupported"
+            detail="外部窗口直接捕获暂未支持，不会导入 SGF 或替换棋盘。"
+            actionLabel="检查捕获状态"
+            disabled={disabled}
+            onAction={() => void handleLegacyHelperStatus("external_window_capture")}
+          />
+          <HelperCard
+            testId="legacy-helper-external-client-unsupported"
+            title="外部客户端协议捕获"
+            status="recoverable unsupported"
+            detail="外部客户端捕获属于未实现功能；请使用标准导入路径。"
+            actionLabel="检查客户端状态"
+            disabled={disabled}
+            onAction={() => void handleLegacyHelperStatus("external_client_capture")}
+          />
+        </div>
+        <p className="provider-status" data-testid="legacy-helper-no-board-replacement">
+          外部捕获辅助工具提供安全回退保护：不会执行任何未经确认的导入，不会以错误数据替换棋盘。
+        </p>
+        {legacyHelperResult ? (
+          <dl className="provider-preview legacy-helper-result" data-testid="legacy-helper-status">
+            <div>
+              <dt>Helper</dt>
+              <dd>{legacyHelperResult.title}</dd>
+            </div>
+            <div>
+              <dt>Status</dt>
+              <dd>{legacyHelperResult.status}</dd>
+            </div>
+            <div>
+              <dt>Import</dt>
+              <dd>{legacyHelperResult.imported ? "imported" : "not imported"}</dd>
+            </div>
+            <div>
+              <dt>Board</dt>
+              <dd>{legacyHelperResult.boardReplacement === "none" ? "not replaced" : legacyHelperResult.boardReplacement}</dd>
+            </div>
+            <div>
+              <dt>Message</dt>
+              <dd title={legacyHelperResult.message}>{legacyHelperResult.message}</dd>
+            </div>
+          </dl>
+        ) : null}
+        <WarningList label="Legacy helper warnings" warnings={legacyHelperResult?.warnings ?? []} />
+      </section>
+    </section>
+  );
+}
+
+function HelperCard({
+  testId,
+  title,
+  status,
+  detail,
+  actionLabel,
+  disabled,
+  onAction
+}: {
+  testId: string;
+  title: string;
+  status: string;
+  detail: string;
+  actionLabel: string;
+  disabled: boolean;
+  onAction: () => void;
+}) {
+  return (
+    <section className="legacy-helper-card" data-testid={testId}>
+      <div>
+        <strong>{title}</strong>
+        <span>{status}</span>
+      </div>
+      <p>{detail}</p>
+      <button type="button" disabled={disabled} onClick={onAction}>{actionLabel}</button>
+    </section>
+  );
+}
+
+function WarningList({ label, warnings }: { label: string; warnings: string[] }) {
+  if (warnings.length === 0) return null;
+  return (
+    <div className="warning-list" role="status" aria-label={label}>
+      <strong>{label}</strong>
+      <ul>
+        {warnings.slice(0, 5).map((warning, index) => (
+          <li key={`${index}:${warning}`} title={warning}>{warning}</li>
+        ))}
+      </ul>
+      {warnings.length > 5 ? <small>{warnings.length - 5} more warning(s)</small> : null}
+    </div>
+  );
+}
+
+function buildYikeFetchRequest(descriptor: YikeUrlDescriptor, sourceUrl: string): ProviderFetchRequest {
+  return {
+    provider: "yike",
+    url: descriptor.request_url,
+    method: "get",
+    headers: {},
+    source_url: optionalTrimmed(sourceUrl),
+    source_id: descriptor.id,
+    timeout_ms: providerFetchTimeoutMs
+  };
+}
+
+function buildFoxFetchRequest(input: FoxFetchInput): ProviderFetchRequest {
+  return {
+    provider: "fox",
+    url: input.url,
+    method: "get",
+    headers: {},
+    source_url: input.sourceUrl,
+    source_id: input.sourceId,
+    timeout_ms: providerFetchTimeoutMs
+  };
+}
+
+function buildRequest(provider: ProviderKind, payload: string, sourceUrl: string, descriptor: YikeUrlDescriptor | null): ProviderImportRequest {
+  const trimmedSourceUrl = sourceUrl.trim();
+  const metadata = emptyProviderMetadata();
+  if (trimmedSourceUrl) metadata.source_url = trimmedSourceUrl;
+  if (descriptor) {
+    metadata.request_url = descriptor.request_url;
+    metadata.source_id = descriptor.id;
+    metadata.room_id = String(descriptor.room_id);
+    metadata.extra.room_kind = descriptor.room_kind;
+  }
+  return {
+    provider,
+    payload,
+    source_url: trimmedSourceUrl || null,
+    source_id: descriptor?.id ?? null,
+    metadata
+  };
+}
+
+function buildFetchImportRequest(result: ProviderFetchResult, fallbackSourceUrl: string | null, fallbackSourceId: string | null): ProviderImportRequest {
+  const metadata = normalizeMetadata({
+    ...result.metadata,
+    request_url: result.metadata.request_url ?? result.url,
+    source_url: result.metadata.source_url ?? fallbackSourceUrl,
+    source_id: result.metadata.source_id ?? fallbackSourceId,
+    extra: {
+      ...(result.metadata.extra ?? {}),
+      status_code: String(result.status_code),
+      content_type: result.content_type ?? ""
+    }
+  });
+  return {
+    provider: result.provider,
+    payload: result.payload,
+    source_url: metadata.source_url,
+    source_id: metadata.source_id,
+    metadata
+  };
+}
+
+function buildReadboardSnapshotImportResult(result: ReadboardSidecarSyncSnapshotResult, endpoint: string | null): ProviderImportResult {
+  if (!result.position) throw new Error("Preview a readboard snapshot with a position before importing.");
+  const sgfBuild = buildReadboardSnapshotSgf(result.position);
+  const snapshotId = readboardSnapshotId(result);
+  const snapshotHash = readboardSnapshotHash(result);
+  const sourceMetadata = readboardResultMetadata(result);
+  const metadata = normalizeMetadata({
+    source_url: endpoint,
+    source_id: snapshotId,
+    title: `Readboard snapshot ${snapshotId}`,
+    provider_status: "snapshot_only",
+    extra: {
+      import_kind: "readboard_snapshot",
+      history_scope: "current_position_only_not_complete_game_history",
+      snapshot_id: snapshotId,
+      snapshot_hash: snapshotHash ?? "",
+      confidence: String(result.confidence ?? ""),
+      board_size: String(result.position.board_size),
+      move_number: String(result.position.move_number),
+      to_play: result.position.to_play,
+      ...sourceMetadata
+    }
+  });
+  const warnings = [
+    "Readboard snapshot import contains only the current board position; it is not a complete game history.",
+    "Move order, captures, comments, clock data, and earlier variations are not reconstructed from this snapshot.",
+    ...result.warnings,
+    ...result.position.errors,
+    ...sgfBuild.warnings
+  ];
+  return {
+    provider: "readboard_snapshot",
+    sgf_text: sgfBuild.sgfText,
+    summary: {
+      provider: "readboard_snapshot",
+      source_id: snapshotId,
+      board_size: result.position.board_size,
+      move_count: 0
+    },
+    metadata,
+    warnings
+  };
+}
+
+function buildReadboardSnapshotSgf(position: PositionDto): { sgfText: string; warnings: string[] } {
+  const boardSize = normalizeBoardSize(position.board_size);
+  const warnings: string[] = [];
+  if (boardSize !== position.board_size) {
+    warnings.push(`Readboard board size ${position.board_size} was normalized to ${boardSize} for SGF SZ.`);
+  }
+
+  const blackStones = uniqueSortedSgfPoints(position.stones, "black", boardSize, warnings);
+  const whiteStones = uniqueSortedSgfPoints(position.stones, "white", boardSize, warnings);
+  const properties = [`FF[4]`, `GM[1]`, `SZ[${boardSize}]`];
+  if (blackStones.length > 0) properties.push(`AB${blackStones.map((point) => `[${point}]`).join("")}`);
+  if (whiteStones.length > 0) properties.push(`AW${whiteStones.map((point) => `[${point}]`).join("")}`);
+  properties.push(`PL[${playerColorSgfValue(position.to_play)}]`);
+  return { sgfText: `(;${properties.join("")})`, warnings };
+}
+
+function normalizeBoardSize(boardSize: number): number {
+  if (Number.isInteger(boardSize) && boardSize >= 1 && boardSize <= 52) return boardSize;
+  return 19;
+}
+
+function uniqueSortedSgfPoints(stones: StoneDto[], color: PlayerColor, boardSize: number, warnings: string[]): string[] {
+  const points = new Set<string>();
+  for (const stone of stones) {
+    if (stone.color !== color) continue;
+    if (!isBoardCoordinate(stone.x, boardSize) || !isBoardCoordinate(stone.y, boardSize)) {
+      warnings.push(`Skipped ${stone.color} stone outside ${boardSize}x${boardSize} board at (${stone.x}, ${stone.y}).`);
+      continue;
+    }
+    points.add(`${sgfCoordinate(stone.x)}${sgfCoordinate(stone.y)}`);
+  }
+  return [...points].sort();
+}
+
+function isBoardCoordinate(value: number, boardSize: number): boolean {
+  return Number.isInteger(value) && value >= 0 && value < boardSize;
+}
+
+function sgfCoordinate(value: number): string {
+  const code = value < 26 ? 97 + value : 65 + value - 26;
+  return String.fromCharCode(code);
+}
+
+function playerColorSgfValue(color: PlayerColor): string {
+  return color === "black" ? "B" : "W";
+}
+
+function normalizeFoxFetchInput(rawInput: string): FoxFetchInput {
+  const trimmed = rawInput.trim();
+  if (!trimmed) throw new Error("Enter a Fox numeric chessid or command.");
+  if (/^https?:\/\//i.test(trimmed)) {
+    throw new Error("Fox direct http(s) URLs are not supported here. Enter a numeric chessid, chessid <id>, uid <id> [last_code], or user_name <name>.");
+  }
+  if (/^\d+$/.test(trimmed)) {
+    return { url: `chessid ${trimmed}`, sourceUrl: null, sourceId: trimmed };
+  }
+  const chessidMatch = /^chessid\s+(\d+)\s*$/i.exec(trimmed);
+  if (chessidMatch) {
+    return { url: `chessid ${chessidMatch[1]}`, sourceUrl: null, sourceId: chessidMatch[1] };
+  }
+  const uidMatch = /^uid\s+(\d+)(?:\s+(\S+))?\s*$/i.exec(trimmed);
+  if (uidMatch) {
+    return { url: `uid ${uidMatch[1]}${uidMatch[2] ? ` ${uidMatch[2]}` : ""}`, sourceUrl: null, sourceId: uidMatch[1] };
+  }
+  const userNameMatch = /^user_name\s+(\S+)\s*$/i.exec(trimmed);
+  if (userNameMatch) {
+    return { url: `user_name ${userNameMatch[1]}`, sourceUrl: null, sourceId: userNameMatch[1] };
+  }
+  throw new Error("Enter a Fox numeric chessid or command: chessid <id>, uid <id> [last_code], or user_name <name>.");
+}
+
+function normalizeMetadata(metadata: ProviderGameMetadata): ProviderGameMetadata {
+  return { ...metadata, extra: metadata.extra ?? {} };
+}
+
+function optionalTrimmed(value: string): string | null {
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function importStatus(result: ProviderImportResult): string {
+  return result.warnings.length > 0
+    ? `Imported with ${result.warnings.length} warning(s).`
+    : `Imported ${providerLabel(result.provider)} payload.`;
+}
+
+function providerFetchStatus(result: ProviderFetchResult, label: string): string {
+  const warnings = result.warnings.length > 0 ? `, ${result.warnings.length} warning(s)` : "";
+  return `${label} fetch ${result.status_code}; imported payload${warnings}.`;
+}
+
+function readboardSyncStatus(result: ReadboardSidecarSyncSnapshotResult): string {
+  const position = result.position ? `position ${result.position.board_size}x${result.position.board_size} move ${result.position.move_number}` : "no position";
+  const warnings = result.warnings.length > 0 ? `, ${result.warnings.length} warning(s)` : "";
+  return `Snapshot preview ${readboardSnapshotId(result)}: ${position}${warnings}.`;
+}
+
+function readboardImagePreviewStatus(result: ReadboardSidecarSyncSnapshotResult): string {
+  const snapshotId = readboardSnapshotId(result);
+  if (!result.position) return `Controlled board image preview ${snapshotId}: no position extracted; no import performed.`;
+  return `Controlled board image preview ${snapshotId}: ${result.position.board_size}x${result.position.board_size}, ${result.position.stones.length} stones, ${colorLabel(result.position.to_play)} to play. Confirm before import.`;
+}
+
+function readboardSnapshotImportStatus(result: ProviderImportResult): string {
+  return `Imported readboard snapshot ${result.metadata.source_id ?? "current"} with ${result.summary.board_size ?? "unknown"}x${result.summary.board_size ?? "unknown"} position and ${result.warnings.length} warning(s).`;
+}
+
+function legacyHelperPendingStatus(kind: LegacyImportCaptureHelperKind): string {
+  if (kind === "image_ocr") return "Checking controlled image import / external OCR helper boundary...";
+  if (kind === "external_window_capture" || kind === "external_client_capture") return "Checking external capture helper boundary...";
+  return "Checking legacy import helper path...";
+}
+
+function legacyHelperStatus(result: LegacyImportCaptureHelperResult): string {
+  if (result.status === "available") return `${result.title} available; no import performed yet.`;
+  return `${result.title}: recoverable unsupported; no import performed and board not replaced.`;
+}
+
+function positionStatus(result: ReadboardSidecarSyncSnapshotResult): string {
+  if (!result.position) return "none";
+  return `${result.position.board_size}x${result.position.board_size}, move ${result.position.move_number}, ${result.position.stones.length} stones`;
+}
+
+function readboardSnapshotId(result: ReadboardSidecarSyncSnapshotResult): string {
+  return result.snapshot_id || result.snapshotId || "unreported snapshot";
+}
+
+function readboardSnapshotHash(result: ReadboardSidecarSyncSnapshotResult): string | null {
+  return result.snapshot_hash ?? result.snapshotHash ?? result.hash ?? null;
+}
+
+function readboardConfidence(result: ReadboardSidecarSyncSnapshotResult): string {
+  const confidence = result.confidence;
+  if (confidence === null || confidence === undefined || confidence === "") return "not reported";
+  if (typeof confidence === "number") {
+    const value = confidence <= 1 ? confidence * 100 : confidence;
+    return `${value.toFixed(value >= 10 ? 1 : 2)}%`;
+  }
+  return confidence;
+}
+
+function readboardPreviewSourceLabel(kind: ReadboardPreviewKind): string {
+  if (kind === "image_path") return "controlled image path";
+  if (kind === "image_base64") return "controlled image base64";
+  if (kind === "protocol") return "protocol snapshot line";
+  return "not reported";
+}
+
+function readboardResultMetadata(result: ReadboardSidecarSyncSnapshotResult): Record<string, string> {
+  return stringifyMetadata(result.source_metadata ?? result.sourceMetadata ?? result.metadata ?? {});
+}
+
+function readboardSourceMetadata(result: ReadboardSidecarSyncSnapshotResult, kind: ReadboardPreviewKind): string[] {
+  const entries = Object.entries(readboardResultMetadata(result)).map(([key, value]) => `${key}: ${value}`);
+  if (result.source) entries.unshift(`source: ${result.source}`);
+  entries.unshift(`input: ${readboardPreviewSourceLabel(kind)}`);
+  return entries;
+}
+
+function stringifyMetadata(metadata: Record<string, string> | null | undefined): Record<string, string> {
+  if (!metadata) return {};
+  const normalized: Record<string, string> = {};
+  for (const [key, value] of Object.entries(metadata)) {
+    if (value === undefined || value === null) continue;
+    normalized[key] = String(value);
+  }
+  return normalized;
+}
+
+function warningCount(warnings: string[]): string {
+  return warnings.length === 0 ? "none" : `${warnings.length} warning(s)`;
+}
+
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result);
+      } else {
+        reject(new Error("Image file did not produce a base64 data URL."));
+      }
+    });
+    reader.addEventListener("error", () => reject(reader.error ?? new Error("Image file read failed.")));
+    reader.readAsDataURL(file);
+  });
+}
+
+function cleanImageBase64(value: string): string {
+  const trimmed = value.trim();
+  const comma = trimmed.indexOf(",");
+  if (/^data:image\//i.test(trimmed) && comma >= 0) return trimmed.slice(comma + 1).trim();
+  return trimmed;
+}
+
+function colorLabel(color: PlayerColor): string {
+  return color === "black" ? "Black" : "White";
+}
+
+function errorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (isErrorRecord(error) && typeof error.message === "string") return error.message;
+  if (isErrorRecord(error) && typeof error.kind === "string") return error.kind;
+  return String(error);
+}
+
+function isErrorRecord(value: unknown): value is { kind?: unknown; message?: unknown } {
+  return typeof value === "object" && value !== null;
+}

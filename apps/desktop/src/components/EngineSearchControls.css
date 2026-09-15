@@ -1,0 +1,7 @@
+.engine-search-controls { border-top: 1px solid var(--border-color, #37444c); margin-top: 12px; padding-top: 10px; }
+.engine-search-controls summary { cursor: pointer; font-weight: 600; padding: 4px 0; }
+.search-controls-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(130px,1fr)); gap: 10px; margin: 10px 0; }
+.search-controls-grid label { display: flex; flex-direction: column; gap: 5px; font-size: 12px; }
+.search-controls-grid input,.search-controls-grid select { width: 100%; min-width: 0; box-sizing: border-box; }
+.engine-search-controls p,.search-controls-status { color: var(--text-muted,#9badb5); font-size: 12px; line-height: 1.5; }
+.search-controls-status { display: block; margin-top: 8px; }

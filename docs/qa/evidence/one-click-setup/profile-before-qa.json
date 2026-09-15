@@ -1,0 +1,17 @@
+{
+  "selected_profile_id": "default",
+  "profiles": [
+    {
+      "id": "default",
+      "profile": {
+        "name": "Local KataGo",
+        "engine_path": "/opt/homebrew/bin/katago",
+        "model_path": "/Users/ice/.lizzieyzy-dev/models/kata1-tf2-b10c384-s2941M-d5872M.bin.gz",
+        "config_path": "/Users/ice/.lizzieyzy-dev/configs/gtp_live.cfg",
+        "working_dir": "/Users/ice/.lizzieyzy-dev",
+        "backend": "kata_go_analysis"
+      },
+      "max_visits": 800
+    }
+  ]
+}

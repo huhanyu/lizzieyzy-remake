@@ -1,0 +1,10 @@
+.document-tools nav,.document-actions {display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;}
+.document-tools fieldset {border:0;padding:0;min-width:0;}
+.document-info-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0;}
+.document-info-grid label,.document-paste {display:flex;flex-direction:column;gap:5px;font-size:12px;}
+.document-tools input,.document-tools select,.document-tools textarea {width:100%;box-sizing:border-box;}
+.document-tools textarea {min-height:72px;resize:vertical;}
+.document-tools p {font-size:12px;color:#a5b4bd;line-height:1.5;}
+.document-tools button[aria-pressed="true"] {background:#235f61;color:#bbf5ee;border-color:#43c5bb;}
+.recent-document {display:flex;gap:5px;margin:5px 0;}
+.recent-document button:first-child {flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;}

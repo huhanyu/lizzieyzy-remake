@@ -1,0 +1,6 @@
+{
+  "apps/desktop/src/App.tsx": "ddc960d07ce4e92d3064bd7c4eecfaa027e3875463ed806e6fa5c5c1aa579cd9",
+  "apps/desktop/src/domain/livePosition.ts": "a42d6549dcfb341b8f84accbfc9158077dcc2632cd53a0abc1790c6cae29ead2",
+  "apps/desktop/src-tauri/src/lib.rs": "0d9c349f1d47a1076daf59d489de2d822fd82411bd5efb3ee62e8955253e9ccb",
+  "target/debug/bundle/macos/LizzieYzy Next.app/Contents/MacOS/lizzieyzy-next-desktop": "ce20180b95ed70c326469160f8aba714543beb1b1d2401678821738e4bbdec13"
+}

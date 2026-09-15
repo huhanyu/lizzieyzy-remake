@@ -1,0 +1,70 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "LizzieYzy Next",
+  "version": "0.1.0",
+  "identifier": "org.lizzieyzy.next",
+  "mainBinaryName": "lizzieyzy-next-desktop",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://127.0.0.1:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "LizzieYzy Next",
+        "width": 1280,
+        "height": 840,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "publisher": "LizzieYzy Next contributors",
+    "copyright": "Copyright (c) 2026 LizzieYzy Next contributors",
+    "category": "Utility",
+    "shortDescription": "Desktop Go review workspace powered by Tauri, Rust, and TypeScript.",
+    "longDescription": "LizzieYzy Next is the Tauri 2 desktop workspace for SGF review, KataGo-backed analysis, profiles, and local analysis cache validation.",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico",
+      "icons/icon.png"
+    ],
+    "macOS": {
+      "bundleName": "LizzieYzy Next",
+      "minimumSystemVersion": "10.13",
+      "hardenedRuntime": true
+    },
+    "windows": {
+      "allowDowngrades": false,
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper",
+        "silent": true
+      }
+    },
+    "linux": {
+      "appimage": {
+        "bundleMediaFramework": false
+      },
+      "deb": {
+        "section": "utils",
+        "priority": "optional"
+      },
+      "rpm": {
+        "epoch": 0,
+        "release": "1"
+      }
+    }
+  }
+}

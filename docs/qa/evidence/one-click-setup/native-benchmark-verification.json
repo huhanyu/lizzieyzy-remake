@@ -1,0 +1,11 @@
+{
+  "recommendedThreads": 8,
+  "savedConfig": "/Users/ice/Library/Application Support/org.lizzieyzy.next.setup-qa/setup-configs/benchmark-b28ae339-83f4-4067-aa51-cb6f0bd92a56.cfg",
+  "savedParameters": [
+    "numSearchThreads = 8",
+    "numAnalysisThreads = 1",
+    "numSearchThreadsPerAnalysisThread = 8"
+  ],
+  "originalConfigStillSixThreads": true,
+  "originalProfileUnchanged": true
+}

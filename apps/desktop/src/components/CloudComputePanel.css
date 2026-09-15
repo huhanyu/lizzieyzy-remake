@@ -1,0 +1,31 @@
+.cloud-compute-panel { display: grid; gap: 14px; padding: 18px; border: 1px solid rgba(148,163,184,.2); border-radius: 14px; background: rgba(15,23,42,.45); color: #dce4ef; }
+.cloud-compute-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.cloud-compute-heading h3 { margin: 0; font-size: 16px; }
+.cloud-compute-heading p { margin: 5px 0 0; color: #9daec4; font-size: 12px; }
+.cloud-compute-badge { padding: 4px 9px; border-radius: 20px; background: #283346; color: #b9c6d9; font-size: 12px; white-space: nowrap; }
+.cloud-compute-badge.is-connected { color: #9be0c5; background: #173d36; }
+.cloud-compute-login { display: grid; gap: 10px; }
+.cloud-compute-login label { display: grid; gap: 6px; color: #b9c6d9; font-size: 12px; }
+.cloud-compute-login input { box-sizing: border-box; width: 100%; min-width: 0; padding: 9px 11px; border: 1px solid #3b4960; border-radius: 7px; background: #141e2d; color: #edf3fa; font: inherit; font-size: 14px; }
+.cloud-compute-panel button { padding: 9px 12px; border: 1px solid #486b98; border-radius: 7px; background: #294d7c; color: #eef5ff; font: inherit; font-size: 13px; cursor: pointer; }
+.cloud-compute-panel button:disabled { opacity: .5; cursor: not-allowed; }
+.cloud-compute-panel button:not(:disabled):hover { filter: brightness(1.15); }
+.cloud-compute-panel :is(input,button):focus-visible { outline: 2px solid #8bbdff; outline-offset: 2px; }
+.cloud-compute-panel .cloud-compute-secondary { padding: 5px 9px; border-color: #3b4960; background: transparent; }
+.cloud-compute-account { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 13px; }
+.cloud-compute-account span { overflow-wrap: anywhere; }
+.cloud-compute-model { display: grid; grid-template-columns: 1fr auto; gap: 8px 16px; padding: 12px; border-radius: 8px; background: rgba(148,163,184,.07); font-size: 12px; }
+.cloud-compute-model span { color: #9daec4; }
+.cloud-compute-model strong { font-weight: 500; }
+.cloud-compute-hint,.cloud-compute-notice { margin: 0; font-size: 12px; line-height: 1.65; overflow-wrap: anywhere; }
+.cloud-compute-hint { color: #9daec4; }
+.cloud-compute-notice { color: #c6d8ef; }
+.cloud-compute-actions button { width: 100%; }
+
+.cloud-selection { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 12px 0; }
+.cloud-selection label { display: flex; flex-direction: column; gap: 6px; font-size: 12px; }
+.cloud-selection select { width: 100%; min-width: 0; }
+.cloud-selection small { grid-column: 1 / -1; color: var(--muted, #9dafb9); }
+.cloud-compute-login .cloud-remember { flex-direction: row; align-items: center; gap: 8px; }
+.cloud-remember input[type="checkbox"] { width: auto; }
+@media (max-width: 560px) { .cloud-selection { grid-template-columns: 1fr; } }

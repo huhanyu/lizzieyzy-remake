@@ -1,0 +1,1 @@
+{"id": "p2-queue-b", "moves": [["B", "E5"], ["W", "E7"], ["B", "C5"]], "rules": "japanese", "komi": 6.5, "boardXSize": 9, "boardYSize": 9, "analyzeTurns": [0, 1, 2, 3], "maxVisits": 8, "includeOwnership": true, "includePolicy": true}

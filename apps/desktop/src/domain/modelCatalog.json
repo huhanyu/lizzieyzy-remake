@@ -1,0 +1,56 @@
+[
+  {
+    "id": "balanced-b10c512h8nbt3tflrs-fson-silu-rsnh",
+    "name": "均衡分析",
+    "purpose": "balanced",
+    "url": "https://github.com/lightvector/KataGo/releases/download/v1.17.1/b10c512h8nbt3tflrs-fson-silu-rsnh.bin.gz",
+    "sha256": "c04db4a503721d948bb720324f3cbdac6088cc9eb243632f020e4b6846f58995",
+    "bytes": 94281753,
+    "description": "中型 Transformer，兼顾计算速度与分析深度。",
+    "minimumVersion": "1.17.0",
+    "compatibility": "需要 KataGo 1.17.0 或更新版本。请先验证当前引擎及后端可加载该模型，旧版引擎不能使用。Eigen 后端不支持部分非 SwiGLU 结构。"
+  },
+  {
+    "id": "light-b10c384h6nbttflrs",
+    "name": "轻量流畅",
+    "purpose": "light",
+    "url": "https://github.com/lightvector/KataGo/releases/download/v1.17.1/b10c384h6nbttflrs.bin.gz",
+    "sha256": "0ba27eced5180b3e3d0b898b280c541112989765e789d1eb6cd0d31b2b2c1229",
+    "bytes": 38245488,
+    "description": "小型 Transformer，适合优先响应速度的分析。",
+    "minimumVersion": "1.17.0",
+    "compatibility": "需要 KataGo 1.17.0 或更新版本。请先验证当前引擎及后端可加载该模型，旧版引擎不能使用。Eigen 后端不支持部分非 SwiGLU 结构。"
+  },
+  {
+    "id": "deep-b11c768h12nbt3tflrs-fson-silu",
+    "name": "深入研究",
+    "purpose": "deep",
+    "url": "https://github.com/lightvector/KataGo/releases/download/v1.17.1/b11c768h12nbt3tflrs-fson-silu.bin.gz",
+    "sha256": "1881600caab9e9d85a3dd6a019e9b8e7d2c237b5f984e13ed49a8645be3077c6",
+    "bytes": 211660960,
+    "description": "大型 Transformer，资源需求更高；实际速度取决于设备。",
+    "minimumVersion": "1.17.0",
+    "compatibility": "需要 KataGo 1.17.0 或更新版本。请先验证当前引擎及后端可加载该模型，旧版引擎不能使用。Eigen 后端不支持部分非 SwiGLU 结构。"
+  },
+  {
+    "id": "quick-b10c384h6nbttflrs",
+    "name": "快速曲线",
+    "purpose": "quick",
+    "url": "https://github.com/lightvector/KataGo/releases/download/v1.17.1/b10c384h6nbttflrs.bin.gz",
+    "sha256": "0ba27eced5180b3e3d0b898b280c541112989765e789d1eb6cd0d31b2b2c1229",
+    "bytes": 38245488,
+    "description": "独立轻量模型配置，用于快速补算曲线；与轻量流畅共用同一权重。",
+    "minimumVersion": "1.17.0",
+    "compatibility": "需要 KataGo 1.17.0 或更新版本。请先验证当前引擎及后端可加载该模型，旧版引擎不能使用。Eigen 后端不支持部分非 SwiGLU 结构。"
+  },
+  {
+    "id": "human-b18c384nbt-humanv0",
+    "name": "人类风格模型",
+    "purpose": "human",
+    "url": "https://media.katagotraining.org/uploaded/networks/models_extra/b18c384nbt-humanv0.bin.gz",
+    "sha256": "637746e44f0efe00ad1245a50aa9bbf0716efe364c43965ead97bd6835d84ab5",
+    "bytes": 99066230,
+    "description": "HumanSL 可选资源，本入口仅下载保存，不自动启用人类风格分析。",
+    "compatibility": "需支持 HumanSL 的 KataGo；作为辅助模型使用，不能替换主分析模型。"
+  }
+]

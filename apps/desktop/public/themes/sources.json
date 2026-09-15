@@ -1,0 +1,87 @@
+[
+  {
+    "file": "baduktv/board.png",
+    "source": "https://raw.githubusercontent.com/upsided/upsided-sabaki-themes/64f9e6410215394eafc0048ba8f45a1da16b2445/baduktv/goban_texture_smooth.png",
+    "sha256": "2879f27f9f906e19c57b210810dc200cfc13667fe9aa0a71c1da1ce2f5252845"
+  },
+  {
+    "file": "baduktv/black.png",
+    "source": "https://raw.githubusercontent.com/upsided/upsided-sabaki-themes/64f9e6410215394eafc0048ba8f45a1da16b2445/baduktv/glass_black2.png",
+    "sha256": "4250f181e1c5924f8cd14b39d8a19bcfbb791d46d210c9c0b938ddc2552cd2c4"
+  },
+  {
+    "file": "baduktv/white.png",
+    "source": "https://raw.githubusercontent.com/upsided/upsided-sabaki-themes/64f9e6410215394eafc0048ba8f45a1da16b2445/baduktv/glass_white3.png",
+    "sha256": "c7004eb19781c1da044bdf35c3edd2cdf44847680b7c42ce248d95f8c5297514"
+  },
+  {
+    "file": "baduktv/background.png",
+    "source": "https://raw.githubusercontent.com/upsided/upsided-sabaki-themes/64f9e6410215394eafc0048ba8f45a1da16b2445/baduktv/baduktvback.png",
+    "sha256": "d93556f11db923209cbbdf430a0f1abdc0faa6590c6b5d6c61b064ce9c114e11"
+  },
+  {
+    "file": "baduktv/LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/upsided/upsided-sabaki-themes/64f9e6410215394eafc0048ba8f45a1da16b2445/LICENSE",
+    "sha256": "11dfe98af8ea4fd5a5fba871dad32f628b544d5f6543ffb80e627eb0112445ce"
+  },
+  {
+    "file": "baduktv/upstream.css",
+    "source": "https://raw.githubusercontent.com/upsided/upsided-sabaki-themes/64f9e6410215394eafc0048ba8f45a1da16b2445/baduktv/styles.css",
+    "sha256": "e8d0b7ffa70dbd6c511f57884acc9bb75530e72ab04fb8aa2e39fdb59dcd4afd"
+  },
+  {
+    "file": "photorealistic/black.png",
+    "source": "https://raw.githubusercontent.com/SabakiHQ/theme-photorealistic/e5961daa343b9f70a194c0c264734065dd9eb9d7/src/img/black.png",
+    "sha256": "1650059793eb72028b06eaabe72df1c7e91e49912e3cf866fc22cea7a565d4d1"
+  },
+  {
+    "file": "photorealistic/white.png",
+    "source": "https://raw.githubusercontent.com/SabakiHQ/theme-photorealistic/e5961daa343b9f70a194c0c264734065dd9eb9d7/src/img/white.png",
+    "sha256": "e080fd294354cd8f184f44cea7feaf95ca115aa80241bf2ce1c0a2cf02b2fd81"
+  },
+  {
+    "file": "photorealistic/LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/SabakiHQ/theme-photorealistic/e5961daa343b9f70a194c0c264734065dd9eb9d7/README.md",
+    "sha256": "f78885a22317ada879bb95d44d5dd39ab51ceb3e07aedd7672efff27e04d4320"
+  },
+  {
+    "file": "photorealistic/upstream.css",
+    "source": "https://raw.githubusercontent.com/SabakiHQ/theme-photorealistic/e5961daa343b9f70a194c0c264734065dd9eb9d7/src/styles.css",
+    "sha256": "a70f5486cd79f1039720f4638887a7ca8a567de238f0d6529685fac8a9c1eb22"
+  },
+  {
+    "file": "subdued/board.png",
+    "source": "https://raw.githubusercontent.com/fohristiwhirl/sabaki_subdued_theme_40/411345c532e4f9e8ad53b16a26e46b6c8384a154/subdued/subdued_board.png",
+    "sha256": "d7bddea95aa7e615348c5ebcc128f0ef708e33fc03166830258449ef68a6026b"
+  },
+  {
+    "file": "subdued/black.png",
+    "source": "https://raw.githubusercontent.com/fohristiwhirl/sabaki_subdued_theme_40/411345c532e4f9e8ad53b16a26e46b6c8384a154/subdued/black_stone.png",
+    "sha256": "8501003b04b61792cb88419720a3a3185e0f354fe96078c2ba619b4cae503f2c"
+  },
+  {
+    "file": "subdued/white.png",
+    "source": "https://raw.githubusercontent.com/fohristiwhirl/sabaki_subdued_theme_40/411345c532e4f9e8ad53b16a26e46b6c8384a154/subdued/white_stone.png",
+    "sha256": "04330756700e9cee232de722b6043c08d8b72f16f3016c4bc3d118cac0a95a1b"
+  },
+  {
+    "file": "subdued/LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/fohristiwhirl/sabaki_subdued_theme_40/411345c532e4f9e8ad53b16a26e46b6c8384a154/LICENSE.md",
+    "sha256": "a5c065dbac7a3076b8ac3437280ac8d721cb52c6c6ff8d0e5509fa9111c81349"
+  },
+  {
+    "file": "subdued/upstream.css",
+    "source": "https://raw.githubusercontent.com/fohristiwhirl/sabaki_subdued_theme_40/411345c532e4f9e8ad53b16a26e46b6c8384a154/subdued/styles.css",
+    "sha256": "f3eabbc327ecd03ea2139be19329ca9e7fa3a0a9826f55d2669db45c8d431390"
+  },
+  {
+    "file": "photorealistic/board.png",
+    "source": "https://raw.githubusercontent.com/SabakiHQ/shudan/bf2be30c568338c77294a782742036c1b3167c72/css/board.png",
+    "sha256": "2b73e13b7ba8d1930d9977c35b96a354111213dbeffe9ccf01df66ab4519e998"
+  },
+  {
+    "file": "photorealistic/BOARD-LICENSE.txt",
+    "source": "https://raw.githubusercontent.com/SabakiHQ/shudan/bf2be30c568338c77294a782742036c1b3167c72/LICENSE",
+    "sha256": "4f7dfbe3d284cdd836ee4fc19890b567164789af6e1852a18a9cf6f66f92f3b6"
+  }
+]

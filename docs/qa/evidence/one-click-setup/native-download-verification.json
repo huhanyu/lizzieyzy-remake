@@ -1,0 +1,46 @@
+{
+  "models": [
+    {
+      "name": "均衡分析",
+      "bytes": 94281753,
+      "sha256": "c04db4a503721d948bb720324f3cbdac6088cc9eb243632f020e4b6846f58995",
+      "verified": true
+    },
+    {
+      "name": "快速曲线",
+      "bytes": 38245488,
+      "sha256": "0ba27eced5180b3e3d0b898b280c541112989765e789d1eb6cd0d31b2b2c1229",
+      "verified": true
+    }
+  ],
+  "originalProfileUnchanged": true,
+  "qaProfiles": {
+    "selected_profile_id": "default",
+    "profiles": [
+      {
+        "id": "default",
+        "profile": {
+          "name": "Local KataGo",
+          "engine_path": "/opt/homebrew/bin/katago",
+          "model_path": "/Users/ice/Library/Application Support/org.lizzieyzy.next.setup-qa/managed-engines/d31d491b-22a8-48f1-99d3-7818d558fb6b/model.bin.gz",
+          "config_path": "/Users/ice/.lizzieyzy-dev/configs/gtp_live.cfg",
+          "working_dir": "/Users/ice/.lizzieyzy-dev",
+          "backend": "kata_go_analysis"
+        },
+        "max_visits": 800
+      },
+      {
+        "id": "one-click-quick",
+        "profile": {
+          "name": "走势快速补算",
+          "engine_path": "/opt/homebrew/bin/katago",
+          "model_path": "/Users/ice/Library/Application Support/org.lizzieyzy.next.setup-qa/managed-engines/035b1492-34a7-40b5-87f0-96b349974a9e/model.bin.gz",
+          "config_path": "/Users/ice/.lizzieyzy-dev/configs/gtp_live.cfg",
+          "working_dir": "/Users/ice/.lizzieyzy-dev",
+          "backend": "kata_go_analysis"
+        },
+        "max_visits": 200
+      }
+    ]
+  }
+}

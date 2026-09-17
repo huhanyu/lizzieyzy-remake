@@ -35,7 +35,7 @@ jobs:
       - name: Build installer
         working-directory: apps/desktop
         run: npm run tauri:build -- --ci --bundles nsis
-      - name: Package portable edition
+      - name: Collect installer
         run: python scripts/prepare_windows_release.py '${{ matrix.edition }}' --collect
       - uses: actions/upload-artifact@v4
         with:
@@ -56,5 +56,5 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           cd release-assets
-          sha256sum *.zip *.exe > SHA256SUMS-windows.txt
+          sha256sum *.exe > SHA256SUMS-windows.txt
           gh release upload remake-2026.09.17-preview * --repo '${{ github.repository }}' --clobber

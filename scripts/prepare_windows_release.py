@@ -22,8 +22,3 @@ else:
  out=root/'release-assets';out.mkdir(exist_ok=True);stem='lizze-remake-windows-x64-'+a.edition
  installers=list((root/'target/release/bundle/nsis').glob('*.exe'));assert len(installers)==1
  shutil.copy2(installers[0],out/(stem+'-setup.exe'))
- stage=root/'portable';stage.mkdir();shutil.copy2(root/'target/release/lizzieyzy-next-desktop.exe',stage/'lizze-remake.exe')
- if runtime.exists():shutil.copytree(tauri/'runtime',stage/'runtime')
- (stage/'README.txt').write_text('lizze-remake Windows x64 '+a.edition+'\nRequires Microsoft WebView2 Runtime. Installer downloads it when missing.\nNo models included. Use One-click setup to download models.\nCPU edition uses the processor; OpenCL edition requires compatible graphics drivers.\nUnsigned preview; GPU analysis has not been verified on every hardware configuration.\n')
- shutil.make_archive(str(out/stem),'zip',stage)
- with zipfile.ZipFile(out/(stem+'.zip')) as z:assert z.testzip() is None

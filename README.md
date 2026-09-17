@@ -176,7 +176,7 @@ Passing CI means the current Tauri/Rust/TypeScript baseline is structurally heal
 | Windows x64 | cpu | 内置 KataGo CPU 引擎 |
 | Windows x64 | opencl | 内置 KataGo OpenCL 引擎，需要兼容显卡及驱动 |
 
-不发布 Intel Mac 版本。所有内置引擎版均不包含模型，首次通过“一键设置”下载模型。Windows 提供安装版和便携版；便携版需要已安装 WebView2。预览包未做平台代码签名，兼容性和验证范围见 Release 说明。
+不发布 Intel Mac 版本。所有内置引擎版均不包含模型，首次通过“一键设置”下载模型。macOS 提供 DMG，Windows 提供 EXE 安装包；不发布便携 ZIP。Windows 安装程序会在需要时安装 WebView2。预览包未做平台代码签名，兼容性和验证范围见 Release 说明。
 
 Windows 分版本构建入口为 `.github/workflows/windows-preview.yml`。仓库保留的 `.github/workflows/release.yml` 是通用 `v*` 标签构建流程，其平台矩阵不代表本次实际发布的附件。
 

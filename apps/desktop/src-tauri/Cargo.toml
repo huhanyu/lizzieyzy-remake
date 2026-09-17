@@ -35,8 +35,8 @@ tauri-plugin-dialog.workspace = true
 tauri-plugin-opener.workspace = true
 uuid.workspace = true
 
-[target.'cfg(target_os = "macos")'.dependencies]
-security-framework = "3.7"
-
 sha2 = "0.10"
 zip = { version = "0.6.6", default-features = false, features = ["deflate"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+security-framework = "3.7"

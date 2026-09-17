@@ -166,12 +166,19 @@ Passing CI means the current Tauri/Rust/TypeScript baseline is structurally heal
 
 ## Releases
 
-`v0.1.0` is the first public Tauri release candidate for this repository. Release notes are bilingual:
+当前桌面预览版见 [GitHub Releases](https://github.com/huhanyu/lizzieyzy-remake/releases)。请以发布页面实际附件及验证说明为准。
 
-- [Release notes v0.1.0](.github/RELEASE_NOTES_v0.1.0.md)
-- [Changelog](CHANGELOG.md)
+| 平台 | 版本 | 说明 |
+| --- | --- | --- |
+| macOS Apple Silicon | lite | 仅应用，可连接远程算力或自配引擎 |
+| macOS Apple Silicon | with-katago | 内置引擎及运行依赖，当前包要求 macOS 27.0 |
+| Windows x64 | lite | 仅应用，可连接远程算力或自配引擎 |
+| Windows x64 | cpu | 内置 KataGo CPU 引擎 |
+| Windows x64 | opencl | 内置 KataGo OpenCL 引擎，需要兼容显卡及驱动 |
 
-The production release workflow is `.github/workflows/release.yml`. It runs on `v*` tags, builds macOS, Windows, and Linux Tauri bundles, collects assets, writes SHA-256 checksum files, and publishes a GitHub Release. Assets generated without signing or notarization secrets are clearly marked as unsigned release-candidate artifacts.
+不发布 Intel Mac 版本。所有内置引擎版均不包含模型，首次通过“一键设置”下载模型。Windows 提供安装版和便携版；便携版需要已安装 WebView2。预览包未做平台代码签名，兼容性和验证范围见 Release 说明。
+
+Windows 分版本构建入口为 `.github/workflows/windows-preview.yml`。仓库保留的 `.github/workflows/release.yml` 是通用 `v*` 标签构建流程，其平台矩阵不代表本次实际发布的附件。
 
 ## Documentation
 

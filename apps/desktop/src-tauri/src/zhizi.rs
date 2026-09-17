@@ -262,6 +262,11 @@ pub fn zhizi_status(state: tauri::State<'_, ZhiziState>) -> ZhiziStatus {
 pub fn zhizi_catalog() -> serde_json::Value { cloud_selection::catalog() }
 
 #[tauri::command]
+pub fn zhizi_get_selection(state: tauri::State<'_, ZhiziState>) -> CloudSelection {
+    state.inner.lock().unwrap_or_else(|p| p.into_inner()).selection.clone()
+}
+
+#[tauri::command]
 pub fn zhizi_set_selection(selection: CloudSelection, state: tauri::State<'_, ZhiziState>) -> Result<(), String> {
     selection.args()?;
     let mut session = state.inner.lock().unwrap_or_else(|p| p.into_inner());

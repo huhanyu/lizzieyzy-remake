@@ -60,6 +60,7 @@ export function CloudComputePanel({ connected, busy, reconnectStatus, onConnect,
     mounted.current = true;
     let current = true;
     if (desktop) {
+      invoke<typeof selection>("zhizi_get_selection").then(value => { if (current) setSelection(value); }).catch(() => {});
       invoke<Catalog>("zhizi_catalog").then((value) => { if (current) setCatalog(value); }).catch(() => {});
       invoke<AuthStatus>("zhizi_status")
         .then((status) => { if (current) setAuth(status); })
@@ -177,16 +178,16 @@ export function CloudComputePanel({ connected, busy, reconnectStatus, onConnect,
           <button type="submit" disabled={action !== null || !account.trim() || !password}>{action === "login" ? "正在登录…" : "登录智子云"}</button>
         </form>
       )}
-      {catalog && <div className="cloud-selection">
-        <label>算力套餐<select value={selection.plan} disabled={connected || pending} onChange={(event) => setSelection((s) => ({ ...s, plan: event.target.value, backend: "katago-TENSORRT" }))}>{catalog.plans.map((v) => <option key={v} value={v}>{v === "vip-share" ? "VIP 共享" : v}</option>)}</select></label>
-        <label>后端<select value={selection.backend} disabled={connected || pending} onChange={(event) => setSelection((s) => ({ ...s, backend: event.target.value }))}>{catalog.backends.filter((v) => selection.plan === "1x" || v !== "katago-CUDA").map((v) => <option key={v}>{v}</option>)}</select></label>
+      {catalog && auth.logged_in && <div className="cloud-selection">
+        <label>算力套餐<select value={selection.plan} disabled={connected || pending} onChange={(event) => setSelection((s) => ({ ...s, plan: event.target.value, backend: event.target.value === "1x" ? s.backend : "katago-TENSORRT" }))}>{catalog.plans.map((v) => <option key={v} value={v}>{v === "vip-share" ? "VIP 共享" : v}</option>)}</select></label>
         <label>模型<select value={selection.model} disabled={connected || pending} onChange={(event) => setSelection((s) => ({ ...s, model: event.target.value }))}>{catalog.models.map((v) => <option key={v}>{v}</option>)}</select></label>
         <small>{catalog.source}；实际可用性与账户资格以服务响应为准。</small>
       </div>}
-      <p className="cloud-compute-hint">登录后需单独连接算力。非 VIP 套餐可能消耗账户余额；仅在点击连接后请求所选算力。</p>
+      {auth.logged_in && <><p className="cloud-compute-hint">登录后需单独连接算力。非 VIP 套餐可能消耗账户余额；仅在点击连接后请求所选算力。</p>
       <div className="cloud-compute-actions">
         {connected || pending ? <button type="button" disabled={!desktop || action !== null || disconnecting} onClick={() => void disconnect()}>{disconnecting ? "等待断开完成…" : pending && !connected ? "请求取消连接" : "断开云算力"}</button> : <button type="button" disabled={!desktop || checking || !auth.logged_in || action !== null || disconnecting} onClick={() => void connect()}>连接所选算力</button>}
       </div>
+      </>}
       {reconnectStatus && <p role="status" className="cloud-compute-notice">{reconnectStatus}</p>}
       {message && <p className="cloud-compute-notice" role="status" aria-live="polite">{message}</p>}
     </section>

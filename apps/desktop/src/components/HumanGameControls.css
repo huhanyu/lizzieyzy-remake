@@ -1,0 +1,56 @@
+.human-game-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: #0008;
+  display: grid;
+  place-items: center;
+}
+.human-game-dialog {
+  width: min(620px, calc(100vw - 40px));
+  max-height: 85vh;
+  overflow: auto;
+  padding: 24px;
+  background: #222b30;
+  color: #e3ebee;
+  border: 1px solid #46545b;
+  border-radius: 12px;
+  box-shadow: 0 20px 80px #0008;
+}
+.human-game-dialog header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.human-game-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 20px 0;
+}
+.human-game-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.human-game-grid small {
+  overflow-wrap: anywhere;
+}
+.human-game-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.human-game-dialog p {
+  line-height: 1.6;
+}
+.human-game-dialog input,
+.human-game-dialog select {
+  min-width: 0;
+  padding: 6px;
+}
+.human-game-notice {
+  padding: 18px;
+  color: #b8c6cc;
+  line-height: 1.7;
+}

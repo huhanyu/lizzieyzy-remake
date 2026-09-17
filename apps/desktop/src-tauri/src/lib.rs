@@ -1,3 +1,4 @@
+mod human_game;
 mod online_kifu;
 mod background_curve;
 mod benchmark_settings;
@@ -2211,11 +2212,25 @@ fn save_engine_profile_settings(
 #[tauri::command]
 fn load_engine_profiles_settings(app_handle: AppHandle) -> Result<EngineProfilesSettingsDto, String> {
     let path = engine_profile_path(&app_handle)?;
-    match fs::read_to_string(&path) {
+    let mut settings = match fs::read_to_string(&path) {
         Ok(contents) => parse_engine_profiles_settings(&contents, &path),
         Err(err) if err.kind() == ErrorKind::NotFound => load_legacy_engine_profile_settings(&app_handle),
         Err(err) => Err(format!("failed to read {}: {err}", path.display())),
+    }?;
+    if let Ok(resources) = app_handle.path().resource_dir() {
+        let engine = resources.join("runtime/katago/bin").join(if cfg!(windows) { "katago.exe" } else { "katago" });
+        let config = resources.join("runtime/katago/configs/analysis.cfg");
+        if engine.is_file() && config.is_file() {
+            for record in &mut settings.profiles {
+                if record.profile.engine_path.trim().is_empty() {
+                    record.profile.engine_path = path_to_string(&engine);
+                    record.profile.config_path = Some(path_to_string(&config));
+                    record.profile.working_dir = Some(path_to_string(path.parent().ok_or("配置目录不可用")?));
+                }
+            }
+        }
     }
+    Ok(settings)
 }
 
 #[tauri::command]
@@ -5375,6 +5390,7 @@ pub fn run() {
         .manage(background_curve::CurveRegistry::default())
         .manage(Mutex::new(LiveReviewSession::default()))
         .manage(try_play::TryPlayState::default())
+        .manage(human_game::HumanGameEngine::default())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
@@ -5426,6 +5442,8 @@ pub fn run() {
             delete_sgf_node,
             reorder_sgf_variation,
             replay_sgf_position_at_node,
+            human_game::human_game_move,
+            human_game::human_game_cancel,
             try_play::try_play_begin,
             try_play::try_play_move,
             try_play::try_play_finish,
@@ -5468,6 +5486,7 @@ pub fn run() {
             live_analysis::katago_console_query,
             zhizi::zhizi_login,
             zhizi::zhizi_catalog,
+            zhizi::zhizi_get_selection,
             zhizi::zhizi_set_selection,
             zhizi::zhizi_restore_login,
             zhizi::zhizi_forget_login,

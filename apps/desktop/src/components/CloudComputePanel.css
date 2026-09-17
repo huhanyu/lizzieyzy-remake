@@ -29,3 +29,13 @@
 .cloud-compute-login .cloud-remember { flex-direction: row; align-items: center; gap: 8px; }
 .cloud-remember input[type="checkbox"] { width: auto; }
 @media (max-width: 560px) { .cloud-selection { grid-template-columns: 1fr; } }
+
+.cloud-login-dialog { width: min(460px, calc(100vw - 40px)); max-height: 85dvh; overflow: auto; padding: 22px; background: #222b30; color: #e3ebee; border: 1px solid #46545b; border-radius: 12px; box-shadow: 0 20px 80px #0008; }
+.cloud-login-dialog::backdrop { background: #0008; }
+.cloud-login-dialog > header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.cloud-login-dialog h2 { margin: 0; font-size: 18px; }
+.cloud-login-dialog > header button { background: transparent; border: 0; color: #acbec7; font-size: 23px; cursor: pointer; }
+.cloud-login-dialog .cloud-compute-panel { border: 0; padding: 0; background: transparent; }
+.cloud-login-dialog .cloud-compute-heading { display: none; }
+.cloud-login-dialog .cloud-compute-login { display: flex; flex-direction: column; gap: 14px; }
+.cloud-login-dialog input:not([type=checkbox]) { width: 100%; box-sizing: border-box; padding: 10px 12px; }

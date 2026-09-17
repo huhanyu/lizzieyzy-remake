@@ -1,3 +1,5 @@
+import {useHumanGame} from "./hooks/useHumanGame";
+import {HumanGameControls} from "./components/HumanGameControls";
 import { OnlineKifuImport } from "./components/OnlineKifuImport";
 import { AnalysisShortcuts } from "./components/AnalysisShortcuts";
 import { useBackgroundCurve } from "./hooks/useBackgroundCurve";
@@ -500,7 +502,15 @@ export function App() {
     () => selectedSgfNodeId ? sgfTree?.nodes.find((node) => node.id === selectedSgfNodeId) ?? null : null,
     [selectedSgfNodeId, sgfTree]
   );
-  const isBusy = researchQueue.busyRef.current || documentEditing || cloud.busy || liveStarting || isKataGoRunning || isCommentSaving || isPropertySaving || isAnnotationSaving || isMoveAppending || isNodeDeleting || isNodeReordering;
+  const humanGame = useHumanGame({sgfText,nodeId:selectedSgfNodeId,profile:liveProfile,message:setMessage,
+    prepare:async options=>{if(trial||trialBusy||researchQueue.busyRef.current||fullReview.busyRef.current)throw new Error('请先结束试下或批量分析');
+      if(options.source!=='local' && (!liveReviewRef.current || analysisSource!==options.source))throw new Error(options.source==='cloud'?'请先在引擎设置中连接智子云，再选择智子云对弈':'请先在引擎设置中连接 SSH 引擎，再选择 SSH 对弈');
+      autoplay.stop();await backgroundCurve.cancel();
+      if(options.source!=='local'){liveReviewEnabledRef.current=false;setLiveReviewEnabled(false);++liveReviewSyncSeqRef.current;await liveQueueRef.current.catch(()=>{});await pauseLiveReview();return liveReviewRef.current!.jobId;}
+      await cloud.disconnect();await stopCurrentLiveSession();return null;},
+    commit:async snapshot=>{await commitDocument({sgfText:snapshot.sgfText,nodeId:snapshot.nodeId,newDocument:snapshot.newDocument??false});}
+  });
+  const isBusy = humanGame.active || researchQueue.busyRef.current || documentEditing || cloud.busy || liveStarting || isKataGoRunning || isCommentSaving || isPropertySaving || isAnnotationSaving || isMoveAppending || isNodeDeleting || isNodeReordering;
   const autoplay = useSgfAutoplay({tree:sgfTree,nodeId:selectedSgfNodeId,documentKey:sgfText,disabled:isBusy || !!trial || trialBusy,onSelect:id=>handleSgfTreeNodeSelect(id,true)});
   const documentHistory = useSgfHistory({sgfText,nodeId:selectedSgfNodeId,documentId:String(documentEpoch),initiallySaved:historyInitiallySaved,
     onRestore: snapshot=>commitDocument({sgfText:snapshot.sgfText,nodeId:snapshot.nodeId,newDocument:false})});
@@ -528,6 +538,7 @@ export function App() {
   }
   async function playBoardPoint(point: {x:number;y:number}) {
     try {
+      if(humanGame.active){await humanGame.play({point});return;}
       if(trial){await playTrial({point});return;}
       if(boardTool==='play'){
         if (sgfMoveEditMode !== "edit" && (currentFilePath || fallbackFileName) && sgfTree && selectedSgfNodeId) {
@@ -2250,6 +2261,7 @@ export function App() {
         setMessage('引擎已停止，可以配置模型。');
       }} setupDisabled={isBusy || liveReview !== null || fullReview.busyRef.current || researchQueue.busyRef.current || cloud.connected || !!trial}
       analysisShortcuts={<AnalysisShortcuts source={analysisSource}
+        cloudPanel={<CloudComputePanel reconnectStatus={cloud.reconnectStatus} connected={cloud.connected} busy={cloud.busy} onConnect={cloud.connect} onDisconnect={cloud.disconnect} />}
         disabled={isBusy || !!trial || trialBusy || isSgfTreeLoading || fullReview.busyRef.current || fullReview.progress.status === 'paused' || researchQueue.busyRef.current || cloud.busy}
         quickBusy={backgroundCurve.busy} onQuick={() => backgroundCurve.start()} onCancelQuick={backgroundCurve.cancel}
         onSwitch={async source => {
@@ -2280,19 +2292,19 @@ export function App() {
       }
       board={
         <BoardCanvas
-                showCandidates={preferences.showCandidates}
+                showCandidates={preferences.showCandidates && !humanGame.hideHints}
           tree={trial?.tree ?? sgfTree}
           selectedNodeId={trial?.node_id ?? selectedSgfNodeId}
-          onDragStone={!trial ? (from,to)=>{if(sgfTree && selectedSgfNodeId)void dragStone(sgfText,sgfTree,selectedSgfNodeId,from,to,currentPosition.board_size).then(text=>commitDocument({sgfText:text,nodeId:selectedSgfNodeId,newDocument:false})).catch(error=>setMessage(errorMessage(error)));} : undefined}
+          onDragStone={!trial && !humanGame.active ? (from,to)=>{if(sgfTree && selectedSgfNodeId)void dragStone(sgfText,sgfTree,selectedSgfNodeId,from,to,currentPosition.board_size).then(text=>commitDocument({sgfText:text,nodeId:selectedSgfNodeId,newDocument:false})).catch(error=>setMessage(errorMessage(error)));} : undefined}
           allowOccupied={boardTool.startsWith("setup-")}
           position={currentPosition}
-          analysis={visibleCurrentFrame}
+          analysis={humanGame.hideHints ? undefined : visibleCurrentFrame}
           selectedCandidateIndex={selectedCandidateIndex}
-          canEdit={!isBusy && !trialBusy && selectedSgfNodeId !== null}
-          editColor={trial ? currentPosition.to_play : editColor}
+          canEdit={(humanGame.active ? humanGame.state?.phase === "human" : !isBusy && !trialBusy) && selectedSgfNodeId !== null}
+          editColor={trial || humanGame.active ? currentPosition.to_play : editColor}
           onPlayPoint={(point) => void playBoardPoint(point)}
-          controls={<div className="trial-controls" aria-label="试下控制">
-            {trial ? <>
+          controls={<div className={`trial-controls${trial || humanGame.active ? " is-active" : ""}`} aria-label="试下控制">
+            {humanGame.active ? <><span>{humanGame.state?.status}</span><HumanGameControls controller={humanGame} disabled={false}/></> : trial ? <>
               <span>试下 · 第 {currentPosition.move_number} 手</span>
               <button disabled={trialBusy} onClick={() => void playTrial("pass")}>停一手</button>
               <button disabled={trialBusy} onClick={() => void finishTrial(true)}>保存变化</button>
@@ -2306,12 +2318,13 @@ export function App() {
         onCommit={commitDocument} boardTool={boardTool} onBoardToolChange={setBoardTool}
         canUndo={documentHistory.canUndo} canRedo={documentHistory.canRedo} onUndo={documentHistory.undo} onRedo={documentHistory.redo}
         recentDocuments={recentDocuments.documents} onOpenRecent={handleOpenSgfDocument} onRemoveRecent={recentDocuments.remove}/>}
+      humanGameControls={<HumanGameControls controller={humanGame} disabled={isBusy || !!trial}/>}
       gameControls={<GameRulesControls rules={game.summary.rules} komi={game.summary.komi} disabled={isBusy || !!trial || trialBusy || !sgfTree} onApply={async (rules, komi) => {
         if (!sgfTree) return;
         const saved = await handleSaveProperties(sgfTree.root_id, [{ key: "RU", values: [rules] }, { key: "KM", values: [String(komi)] }]);
         if (!saved) throw new Error("规则与贴目未保存，请查看状态提示后重试。");
       }} />}
-      chart={
+      chart={humanGame.hideHints ? <p className="human-game-notice">对弈期间隐藏复盘提示，结束后可查看走势和测评。</p> :
         <AnalysisModules
           statistics={{ documentKey: sgfText, tree: sgfTree, selectedNodeId: selectedSgfNodeId, frames: metricFrames }}
           onNodeSelect={(nodeId) => void handleSgfTreeNodeSelect(nodeId)}
@@ -2323,9 +2336,9 @@ export function App() {
           cacheRestoreVerified={reviewWorkflowStatus.cacheRestoreVerified}
         />
       }
-      analysisPanel={
+      analysisPanel={humanGame.hideHints ? <div className="human-game-notice"><h2>人机对弈</h2><p>{humanGame.state?.status}</p><HumanGameControls controller={humanGame} disabled={false}/></div> :
           <AnalysisPanel
-            showCandidates={preferences.showCandidates}
+            showCandidates={preferences.showCandidates && !humanGame.hideHints}
             onShowCandidatesChange={showCandidates => void handlePreferencesChange({...preferences, showCandidates})}
             searchRate={recordedPreview || fullReview.busyRef.current || !liveReviewEnabled ? null : searchSpeed.visitsPerSecond}
             lastMoveMetrics={calculatePositionMetrics({ documentKey: trial?.sgf_text ?? sgfText, tree: trial?.tree ?? sgfTree, selectedNodeId: trial?.node_id ?? selectedSgfNodeId, frames: metricFrames })}

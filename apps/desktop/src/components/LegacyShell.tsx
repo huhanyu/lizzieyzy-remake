@@ -36,6 +36,7 @@ type LegacyShellProps = {
   analysisPanel: ReactNode;
   positionSummary?: ReactNode;
   gameControls?: ReactNode;
+  humanGameControls?: ReactNode;
   analysisShortcuts?: ReactNode;
   documentTools?: ReactNode;
   playbackControls?: ReactNode;
@@ -126,6 +127,7 @@ export function LegacyShell({
   analysisPanel,
   positionSummary,
   gameControls,
+  humanGameControls,
   analysisShortcuts,
   documentTools,
   playbackControls,
@@ -546,7 +548,7 @@ export function LegacyShell({
     >
       <header className="legacy-titlebar">
         <div className="legacy-appmark">
-          <h1>LizzieYzy Next</h1>
+          <h1>lizze-remake</h1>
           <p title={architectureLabel}>围棋分析工作台</p>
         </div>
         <nav ref={menubarRef} className="legacy-menubar" aria-label="Application menu" data-testid="legacy-menubar" data-legacy-menu-groups="File Game Analysis View Engine Tools Help">
@@ -572,7 +574,7 @@ export function LegacyShell({
                       event.currentTarget.closest("details")?.removeAttribute("open");
                     }}
                   >
-                    {MENU_ACTION_LABELS[item.action.id] ?? item.action.label}
+                    <span>{MENU_ACTION_LABELS[item.action.id] ?? item.action.label}</span>{item.action.shortcut && <kbd>{item.action.shortcut}</kbd>}
                   </button>
                 ))}
               </div>
@@ -589,6 +591,7 @@ export function LegacyShell({
       <section className="legacy-toolbar" aria-label="Main toolbar" data-testid="legacy-toolbar">
         <button type="button" data-testid="toolbar-open-sgf" {...actionData("file.open")} onClick={() => void dispatchLegacyAction("file.open", "toolbar")} disabled={isBusy} title="打开 SGF">打开</button>
         {onlineKifu}
+        {humanGameControls}
         <button type="button" data-testid="toolbar-save-sgf" {...actionData("file.save")} onClick={() => void dispatchLegacyAction("file.save", "toolbar")} disabled={isBusy || !canSave} title="保存 SGF">保存</button>
         <button type="button" data-testid="toolbar-save-as-sgf" {...actionData("file.saveAs")} onClick={() => void dispatchLegacyAction("file.saveAs", "toolbar")} disabled={isBusy} title="SGF 另存为">另存为</button>
         <label

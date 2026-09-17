@@ -1,0 +1,58 @@
+name: Windows preview packages
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        edition: [lite, cpu, opencl]
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/desktop/package-lock.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: npm ci
+        working-directory: apps/desktop
+      - name: Prepare verified KataGo runtime
+        run: python scripts/prepare_windows_release.py '${{ matrix.edition }}'
+      - name: Build installer
+        working-directory: apps/desktop
+        run: npm run tauri:build -- --ci --bundles nsis
+      - name: Package portable edition
+        run: python scripts/prepare_windows_release.py '${{ matrix.edition }}' --collect
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-${{ matrix.edition }}
+          path: release-assets/*
+          if-no-files-found: error
+  publish:
+    needs: windows
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: windows-*
+          path: release-assets
+          merge-multiple: true
+      - name: Publish verified artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd release-assets
+          sha256sum *.zip *.exe > SHA256SUMS-windows.txt
+          gh release upload remake-2026.09.17-preview * --repo '${{ github.repository }}' --clobber

@@ -10,9 +10,9 @@
 
 以正方形棋盘为主，左侧显示可关闭的落子树，右侧保留候选点和复盘模块。
 
-![棋盘、落子树与分析面板](docs/images/workspace.png)
+![棋盘、落子树与分析面板](docs/images/workspace.jpg)
 
-*当前浏览器预览截图：回放已记录的真实 KataGo 结果；浏览器本身不运行引擎。该样例没有完整逐手分析数据，因此问题手区域显示分析覆盖率，而非演示统计。*
+*macOS 桌面应用实拍：本地 KataGo 分析与棋谱复盘工作区。*
 
 ### 一键设置
 
@@ -194,4 +194,3 @@ The production release workflow is `.github/workflows/release.yml`. It runs on `
 | [yzyray/FoxRequest](https://github.com/yzyray/FoxRequest) | 野狐棋谱请求相关参考。 |
 | [FuckUbuntu/Lizzieyzy-Helper](https://github.com/FuckUbuntu/Lizzieyzy-Helper) | 历史野狐接入辅助实现参考。 |
 
-同时感谢 [涨棋网](https://zhangqi.com.cn/) 的产品设计启发：推荐选点配色，以及测评、吻合度、走势、问题手、发挥水准的展示形式。这里的参考指界面和交互设计，不表示复用了其服务端代码或私有评估模型。

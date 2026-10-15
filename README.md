@@ -28,10 +28,10 @@
 
 - **棋谱与分支**：SGF 导入、保存、编辑与回放；落子树、主分支设置、偏离主线自动试下及返回。
 - **棋盘交互**：滚轮前进后退、候选点颜色、悬停变化预览、棋谱下一手标记；可单独隐藏棋盘上的推荐点，保留右侧列表。
-- **引擎分析**：本地 KataGo、智子云与远程引擎配置；实时分析、全盘分析、独立本地后台 1v 补线。
+- **引擎分析**：本地 KataGo、云端算力与远程引擎配置；实时分析、全盘分析、独立本地后台 1v 补线。
 - **五个复盘模块**：测评、吻合度、走势、问题手、发挥水准。走势整合胜率与目差；统计显示分析覆盖率，点击相关手数可跳转局面。
 - **本地棋力测评**：迁移 Java 端 XGBoost 20TUN 模型与特征计算，在本地进行推理；模型结果用于复盘参考。
-- **腾讯／野狐棋谱入口**：账号或 UID 查询、列表分页、棋谱 ID 或链接导入。外部服务真实账号下载流程仍需进一步验证。
+- **在线棋谱入口**：账号或 UID 查询、列表分页、棋谱 ID 或链接导入。外部服务真实账号下载流程仍需进一步验证。
 
 下文保留基础工程、开发和发布说明；历史版本记录不等同于本仓库已经发布的安装包。
 
@@ -57,7 +57,7 @@ Implemented in the Next workspace:
 Not yet claimed as complete in the Next workspace:
 
 - Full legacy Java/Swing feature parity.
-- Fox/Yike online game providers as live external-network integrations.
+- Online game providers as live external-network integrations.
 - readboard live sidecar integration in a real target environment.
 - Production signing/notarization for macOS and Windows unless maintainer secrets are configured.
 - End-to-end clean-machine installer smoke coverage across all target platforms.
@@ -164,7 +164,7 @@ CI should be read as scaffold and regression coverage for the Next workspace, no
 
 Provider contract tests and readboard domain tests are accepted through the Rust workspace test gate when those modules land; the handoff should name the exact package or test filter and must not count a zero-test filter as evidence. Release dry-run acceptance is `.github/workflows/release-dry-run.yml` plus `python3 scripts/validate_release_assets.py --verbose`; the workflow uploads diagnostic artifacts and must not create a GitHub release.
 
-Passing CI means the current Tauri/Rust/TypeScript baseline is structurally healthy. It does not mean live Fox/Yike/readboard integrations, bundled large KataGo model distribution, installed-app bundled engine launch, platform signing, notarization, release inclusion, or clean-machine installer smoke checks have completed.
+Passing CI means the current Tauri/Rust/TypeScript baseline is structurally healthy. It does not mean live online-provider/readboard integrations, bundled large KataGo model distribution, installed-app bundled engine launch, platform signing, notarization, release inclusion, or clean-machine installer smoke checks have completed.
 
 ## Releases
 
@@ -200,6 +200,6 @@ Windows 分版本构建入口为 `.github/workflows/windows-preview.yml`。仓�
 | [wimi321/lizzieyzy-next](https://github.com/wimi321/lizzieyzy-next) | Java 维护版本；棋力评估模型、特征计算、吻合度与发挥水准统计的迁移参考。 |
 | [wimi321/lizzieyzy-next-tauri](https://github.com/wimi321/lizzieyzy-next-tauri) | Tauri / Rust / TypeScript 桌面重构工程基础。 |
 | [lightvector/KataGo](https://github.com/lightvector/KataGo) | 围棋分析引擎、分析协议与神经网络模型生态。 |
-| [yzyray/FoxRequest](https://github.com/yzyray/FoxRequest) | 野狐棋谱请求相关参考。 |
-| [FuckUbuntu/Lizzieyzy-Helper](https://github.com/FuckUbuntu/Lizzieyzy-Helper) | 历史野狐接入辅助实现参考。 |
+| [yzyray/FoxRequest](https://github.com/yzyray/FoxRequest) | 在线棋谱请求相关参考。 |
+| [FuckUbuntu/Lizzieyzy-Helper](https://github.com/FuckUbuntu/Lizzieyzy-Helper) | 历史在线对局接入辅助实现参考。 |
 

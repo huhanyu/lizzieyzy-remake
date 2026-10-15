@@ -66,6 +66,7 @@ fn system_proxy() -> Option<String> {
     None
 }
 
+#[cfg(any(target_os = "macos", test))]
 fn parse(text: &str) -> Option<String> {
     let field = |key: &str| -> Option<&str> {
         let mut values = text.lines().filter_map(|line| {

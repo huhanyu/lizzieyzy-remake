@@ -1,5 +1,7 @@
 //! Store only the reusable account token, never the password. No shell commands or files.
+#[cfg(target_os = "macos")]
 const SERVICE: &str = "org.lizzieyzy.next.zhizi";
+#[cfg(target_os = "macos")]
 const ACCOUNT: &str = "remembered-login";
 #[cfg(target_os = "macos")]
 pub fn save(account: &str, token: &str) -> Result<(), String> {

@@ -2,13 +2,21 @@
 /// online records. Standard SGF numeric KM values must remain unchanged.
 pub(crate) fn imported_komi(raw: &str, application: Option<&str>) -> Option<f32> {
     let mut value = raw.trim().parse::<f32>().ok()?;
-    if !value.is_finite() { return None; }
-    if application == Some("GNU Go:3.8") && value >= 200.0 && value.fract() == 0.0 {
+    if !value.is_finite() {
+        return None;
+    }
+    let legacy = application.is_some_and(|app| {
+        let app = app.trim().to_ascii_lowercase();
+        app == "gnu go:3.8" || app == "foxwq" || app.starts_with("foxwq:")
+    });
+    if legacy && value >= 200.0 && value.fract() == 0.0 {
         value /= 100.0;
         // Match Java's legacy import convention: small values or quarter units
         // represent stones; the engine and UI consistently use points.
         let fraction = value.fract().abs();
-        if value.abs() <= 4.0 || fraction == 0.25 || fraction == 0.75 { value *= 2.0; }
+        if value.abs() <= 4.0 || fraction == 0.25 || fraction == 0.75 {
+            value *= 2.0;
+        }
     }
     Some(value)
 }
@@ -18,7 +26,7 @@ mod tests {
     use super::*;
     #[test]
     fn legacy_exports_match_java_conversion() {
-        for (raw, expected) in [("375",7.5),("650",6.5),("750",7.5),("675",13.5)] {
+        for (raw, expected) in [("375", 7.5), ("650", 6.5), ("750", 7.5), ("675", 13.5)] {
             assert_eq!(imported_komi(raw, Some("GNU Go:3.8")), Some(expected));
         }
     }

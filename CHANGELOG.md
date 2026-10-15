@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.0] - 2026-10-15
+
+- Add HumanSL 40 to the existing strength-model selector and assessment table.
+- Reuse ordinary analysis frames; fetch only isolated one-visit HumanSL policies.
+- Detect verified HumanSL assets, offer downloads, and guard cancellation and stale results.
+- Include the current tolerance-review and position-training integration.
+- Align installer versions and release validation; build Windows installers without overwriting an old release.
+- Private strength datasets, SGFs, reference fixtures, and local analysis caches are not distributed.
+
+This public installer update is not Developer ID/notarization or Authenticode certification.
+HumanSL 40 remains experimental when reusing analysis settings different from training.
+
 ## [0.1.0] - 2026-05-01
 
 ### English

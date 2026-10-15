@@ -101,7 +101,7 @@ class LegacyParityMatrixTests(unittest.TestCase):
 | {section} capability | `{statuses[section]}` | {evidence_override or "Evidence names tests and smoke checks for this area."} | External gate recorded or explicitly not required. | Notes explain scope. |
 """
             )
-        write(root / "docs/LEGACY_PARITY_MATRIX.md", "# Legacy Parity Matrix\n\n" + extra_intro + "\n".join(sections))
+        write(root / "docs/qa/legacy-parity.md", "# Legacy Parity Matrix\n\n" + extra_intro + "\n".join(sections))
 
 
 if __name__ == "__main__":

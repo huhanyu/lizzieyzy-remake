@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "documents": [
+    "README.md",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "docs/AGENTS.md",
+    "docs/ARCHITECTURE_NEXT.md",
+    "docs/DEVELOPMENT.md",
+    "docs/MAINTENANCE.md",
+    "docs/README.md",
+    "docs/RELEASE_CHECKLIST.md",
+    "docs/RELEASE_PROCESS.md",
+    "docs/TROUBLESHOOTING.md",
+    "docs/qa/README.md",
+    "docs/qa/legacy-parity.md",
+    "docs/qa/CLOUD_POSITION_LATENCY_20260927.md",
+    "docs/archive/README.md"
+  ],
+  "document_roots": [
+    "docs/engine",
+    ".agents/notes",
+    "tools/doc-governance"
+  ]
+}

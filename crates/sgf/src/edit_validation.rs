@@ -16,16 +16,19 @@ pub fn validate_sgf_tree_legality(input: &str) -> Result<(), SgfError> {
                 [child] => node = child,
                 children => {
                     for child in children {
-                        pending.push((child, SgfReplayState {
-                            board_size: state.board_size,
-                            board: state.board.clone(),
-                            captures_black: state.captures_black,
-                            captures_white: state.captures_white,
-                            to_play: state.to_play,
-                            move_number: state.move_number,
-                            last_move: state.last_move.clone(),
-                            errors: Vec::new(),
-                        }));
+                        pending.push((
+                            child,
+                            SgfReplayState {
+                                board_size: state.board_size,
+                                board: state.board.clone(),
+                                captures_black: state.captures_black,
+                                captures_white: state.captures_white,
+                                to_play: state.to_play,
+                                move_number: state.move_number,
+                                last_move: state.last_move.clone(),
+                                errors: Vec::new(),
+                            },
+                        ));
                     }
                     break;
                 }
@@ -53,5 +56,4 @@ mod tests {
         assert!(validate_sgf_tree_legality("(;SZ[9]AB[aa][ab][ba][cc];W[ee])").is_ok());
         assert!(validate_sgf_tree_legality("(;SZ[9]AB[aa][ab][ba][ee];W[ee])").is_err());
     }
-
 }

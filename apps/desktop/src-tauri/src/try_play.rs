@@ -26,6 +26,8 @@ struct ActiveTryPlay {
 /// What the frontend renders after `begin`/`move`.
 #[derive(Debug, Clone, Serialize)]
 pub struct TryPlayViewDto {
+    pub cursor: usize,
+    pub length: usize,
     /// Echoed so the caller can address later `move`/`finish` calls.
     pub session_id: Uuid,
     /// The working document, including the try-play line. The caller's own text stays untouched.
@@ -50,6 +52,8 @@ impl TryPlayViewDto {
             .and_then(|document| sgf::to_sgf_tree_dto(&document))
             .map_err(|err| err.to_string())?;
         Ok(Self {
+            cursor: session.cursor(),
+            length: session.length(),
             session_id,
             sgf_text,
             node_id: session.current_node_id(),
@@ -146,6 +150,18 @@ pub fn try_play_move(
     state: State<'_, TryPlayState>,
 ) -> Result<TryPlayViewDto, String> {
     play(&state, session_id, vertex)
+}
+
+#[tauri::command]
+pub fn try_play_seek(
+    session_id: Uuid,
+    cursor: usize,
+    state: State<'_, TryPlayState>,
+) -> Result<TryPlayViewDto, String> {
+    let mut guard = lock(&state)?;
+    let active = active_session(&mut guard, session_id)?;
+    active.session.seek(cursor).map_err(|err| err.to_string())?;
+    TryPlayViewDto::build(session_id, &active.session)
 }
 
 #[tauri::command]

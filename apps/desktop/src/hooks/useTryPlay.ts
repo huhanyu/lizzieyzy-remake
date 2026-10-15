@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { invoke, isTauri } from "@tauri-apps/api/core";
 import type { MoveVertex, PositionDto, SgfTreeDto } from "../domain/types";
 
-export type TryPlayView = { session_id: string; sgf_text: string; node_id: string; position: PositionDto; tree: SgfTreeDto | null };
+export type TryPlayView = { cursor: number; length: number; session_id: string; sgf_text: string; node_id: string; position: PositionDto; tree: SgfTreeDto | null };
 type SavedTrial = { sgf_text: string; node_id: string };
 
 /** The original document remains owned by App; only an explicit save publishes this draft. */
@@ -36,6 +36,18 @@ export function useTryPlay(source: string, nodeId: string | null, report: (messa
     const next = await invoke<TryPlayView>("try_play_move", { sessionId: trial.session_id, vertex });
     setTrial(next);
   });
+  const seekTarget = useRef<number | null>(null);
+  const seek = (cursor: number) => {
+    seekTarget.current = cursor;
+    if (pending.current || !trial) return;
+    void run(async () => {
+      while (seekTarget.current !== null) {
+        const target = seekTarget.current;
+        seekTarget.current = null;
+        setTrial(await invoke<TryPlayView>("try_play_seek", { sessionId: trial.session_id, cursor: target }));
+      }
+    });
+  };
   const finish = (save: boolean) => run(async () => {
     if (!trial) return;
     const saved = await invoke<SavedTrial | null>("try_play_finish", { sessionId: trial.session_id, sgfText: source, save });
@@ -43,5 +55,5 @@ export function useTryPlay(source: string, nodeId: string | null, report: (messa
     if (saved) { await commit(saved); report("变化已加入棋谱，保存文件后可再次打开。"); }
     else report("已退出试下，恢复原局面。");
   });
-  return { trial, busy, begin, play, finish };
+  return { trial, busy, begin, play, seek, finish };
 }

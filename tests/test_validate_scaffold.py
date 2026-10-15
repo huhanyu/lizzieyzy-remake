@@ -155,8 +155,8 @@ class ValidateScaffoldTests(unittest.TestCase):
         doc = "Tauri Rust TypeScript production migration handoff. " * 30
         for rel in [
             "docs/ARCHITECTURE_NEXT.md",
-            "docs/MIGRATION_PLAN.md",
-            "docs/AGENT_EXECUTION_SUMMARY.md",
+            "docs/DEVELOPMENT.md",
+            "docs/README.md",
         ]:
             write(root / rel, f"# Doc\n\n{doc}\n")
         write(

@@ -215,7 +215,18 @@ pub fn parse_sgf(input: &str) -> Result<SgfDocument, SgfError> {
     }
     let komi = property_values(&root, "KM")
         .and_then(|v| v.first())
-        .and_then(|v| komi::imported_komi(v, property_values(&root, "AP").and_then(|values| values.first()).map(String::as_str)))
+        .and_then(|v| {
+            let application = root
+                .properties
+                .iter()
+                .filter(|p| p.key == "AP")
+                .flat_map(|p| p.values.iter())
+                .find(|app| {
+                    let app = app.trim().to_ascii_lowercase();
+                    app == "gnu go:3.8" || app == "foxwq" || app.starts_with("foxwq:")
+                });
+            komi::imported_komi(v, application.map(String::as_str))
+        })
         .unwrap_or(7.5);
     let mut move_number = 1;
     let mut moves = Vec::new();
@@ -587,6 +598,47 @@ pub fn replay_sgf_position_at_node(input: &str, node_id: NodeId) -> Result<Posit
     replay_sgf_position_at_path(&document, &path)
 }
 
+/// Copy only the selected history, stripping annotations and the recorded future.
+/// Keeping moves rather than flattening to stones preserves captures, passes and ko history.
+pub fn training_prefix(input: &str, node_id: NodeId) -> Result<EditSgfMoveResult, SgfError> {
+    let mut document = parse_sgf(input)?;
+    let root = document.root.as_ref().ok_or(SgfError::Malformed)?;
+    let path = find_sgf_node_path(root, node_id).ok_or(SgfError::NodeNotFound)?;
+    fn prune(node: &mut SgfNode, path: &[usize]) {
+        node.properties.retain(|p| {
+            matches!(
+                p.key.as_str(),
+                "FF" | "GM" | "CA" | "SZ" | "KM" | "RU" | "HA" | "AB" | "AW" | "AE" | "PL" | "B" | "W"
+            )
+        });
+        if let Some((&index, rest)) = path.split_first() {
+            let mut child = node.children.remove(index);
+            prune(&mut child, rest);
+            node.children = vec![child];
+        } else {
+            node.children.clear();
+        }
+    }
+    // AP may define a legacy fixed-point KM format. Write its parsed value before
+    // dropping AP, otherwise the copied game can acquire a different komi.
+    let komi = document.komi.to_string();
+    let root = document.root.as_mut().ok_or(SgfError::Malformed)?;
+    if let Some(property) = root.properties.iter_mut().find(|p| p.key == "KM") {
+        property.values = vec![komi];
+    } else {
+        root.properties.push(SgfProperty {
+            key: "KM".into(),
+            values: vec![komi],
+        });
+    }
+    prune(document.root.as_mut().ok_or(SgfError::Malformed)?, &path);
+    validate_replayable_document(&document)?;
+    let sgf_text = serialize_sgf_document(&document)?;
+    let tree = to_sgf_tree_dto(&parse_sgf(&sgf_text)?)?.ok_or(SgfError::Malformed)?;
+    let node_id = tree.nodes.last().ok_or(SgfError::Malformed)?.id;
+    Ok(EditSgfMoveResult { sgf_text, node_id })
+}
+
 /// A temporary "try play" line rooted at an anchor node of a source document.
 ///
 /// The session owns a private SGF copy of the source; nothing is written back to
@@ -604,6 +656,8 @@ pub struct TryPlaySession {
     working_sgf: String,
     current_node_id: NodeId,
     moved: bool,
+    trial_line: Vec<NodeId>,
+    trial_cursor: usize,
 }
 
 impl TryPlaySession {
@@ -622,6 +676,8 @@ impl TryPlaySession {
             working_sgf: source_sgf.to_string(),
             current_node_id: anchor_node_id,
             moved: false,
+            trial_line: vec![anchor_node_id],
+            trial_cursor: 0,
         })
     }
 
@@ -633,6 +689,23 @@ impl TryPlaySession {
     /// The node the current try-play line ends at.
     pub fn current_node_id(&self) -> NodeId {
         self.current_node_id
+    }
+
+    pub fn cursor(&self) -> usize {
+        self.trial_cursor
+    }
+    pub fn length(&self) -> usize {
+        self.trial_line.len() - 1
+    }
+
+    /// Navigate the draft without deleting future moves or changing the source.
+    pub fn seek(&mut self, cursor: usize) -> Result<PositionDto, SgfError> {
+        let cursor = cursor.min(self.length());
+        let node = self.trial_line[cursor];
+        let position = replay_sgf_position_at_node(&self.working_sgf, node)?;
+        self.trial_cursor = cursor;
+        self.current_node_id = node;
+        Ok(position)
     }
 
     /// Whether at least one try-play move has been appended.
@@ -673,6 +746,9 @@ impl TryPlaySession {
 
         self.working_sgf = result.sgf_text;
         self.current_node_id = result.new_node_id;
+        self.trial_line.truncate(self.trial_cursor + 1);
+        self.trial_line.push(result.new_node_id);
+        self.trial_cursor += 1;
         self.moved = true;
         Ok(position)
     }
@@ -689,6 +765,8 @@ impl TryPlaySession {
         self.working_sgf = self.source_sgf.clone();
         self.current_node_id = self.anchor_node_id;
         self.moved = false;
+        self.trial_line = vec![self.anchor_node_id];
+        self.trial_cursor = 0;
     }
 
     /// Commit the try-play line as an extra branch of `source_sgf`.
@@ -2083,7 +2161,7 @@ struct SgfParser {
 impl SgfParser {
     fn new(input: &str) -> Self {
         Self {
-            chars: input.chars().collect(),
+            chars: input.strip_prefix('\u{feff}').unwrap_or(input).chars().collect(),
             index: 0,
         }
     }
@@ -3967,6 +4045,19 @@ mod tests {
         assert_eq!(katago_rules_for_sgf_ru(Some("   ")), "chinese");
     }
 
+    #[test]
+    fn fox_komi_survives_import_normalization() {
+        for apps in ["AP[foxwq]", "AP[GNU Go:3.8]AP[foxwq]", "AP[other]AP[foxwq:1.0]"] {
+            let source = format!("(;GM[1]FF[4]SZ[19]KM[375]RU[Chinese]{apps};B[pd];W[dd])");
+            assert_eq!(parse_sgf(&source).unwrap().komi, 7.5);
+            let normalized = normalize_fox_sgf(&source);
+            assert_eq!(parse_sgf(&normalized).unwrap().komi, 7.5);
+            assert_eq!(parse_sgf(&normalize_fox_sgf(&normalized)).unwrap().komi, 7.5);
+        }
+        assert_eq!(parse_sgf("(;SZ[19]KM[375]AP[other])").unwrap().komi, 375.0);
+        assert_eq!(parse_sgf("(;SZ[19]KM[7.5]AP[foxwq])").unwrap().komi, 7.5);
+    }
+
     fn try_play_anchor(sgf: &str, move_number: u32) -> NodeId {
         let tree = to_sgf_tree_dto(&parse_sgf(sgf).unwrap()).unwrap().unwrap();
         tree.nodes
@@ -3974,6 +4065,31 @@ mod tests {
             .find(|node| node.move_number == Some(move_number))
             .unwrap()
             .id
+    }
+
+    #[test]
+    fn try_play_seek_preserves_future_and_branches_from_cursor() {
+        let source = "(;SZ[5];B[aa])";
+        let mut session = TryPlaySession::begin(source, try_play_anchor(source, 1)).unwrap();
+        session.play_pass().unwrap();
+        let first = session.current_node_id();
+        session.play_pass().unwrap();
+        let end = session.current_node_id();
+        assert_eq!(session.length(), 2);
+        assert_eq!(session.seek(0).unwrap().move_number, 1);
+        assert_eq!(session.seek(99).unwrap().move_number, 3);
+        assert_eq!(session.current_node_id(), end);
+        session.seek(1).unwrap();
+        assert_eq!(session.current_node_id(), first);
+        session.play(MoveVertex::Point(PointDto { x: 1, y: 1 })).unwrap();
+        assert_eq!(session.cursor(), 2);
+        assert_ne!(session.current_node_id(), end);
+        let saved = session.save(source).unwrap();
+        assert!(saved.sgf_text.contains("bb"));
+        session.exit();
+        assert_eq!(session.cursor(), 0);
+        assert_eq!(session.length(), 0);
+        assert_eq!(session.working_sgf(), source);
     }
 
     #[test]

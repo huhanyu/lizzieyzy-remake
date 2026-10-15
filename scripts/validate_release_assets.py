@@ -25,6 +25,7 @@ RELEASE_NOTES_CONFIG = ".github/release.yml"
 EXPECTED_IDENTIFIER = "org.lizzieyzy.next"
 EXPECTED_BINARY = "lizzieyzy-next-desktop"
 EXPECTED_PRODUCT = "LizzieYzy Next"
+EXPECTED_WINDOW_TITLE = "lizze-remake"
 EXPECTED_DRY_RUN_ARTIFACT = "release-dry-run-${{ runner.os }}"
 EXPECTED_RELEASE_LABELS = {"release", "packaging", "desktop", "tauri"}
 REQUIRED_SIGNING_SECRET_NAMES = {
@@ -159,8 +160,8 @@ class ReleaseAssetValidator:
         if not bundle.get("linux", {}).get("deb"):
             errors.append("bundle.linux.deb metadata is required")
         windows = app.get("windows", [])
-        if not windows or windows[0].get("title") != EXPECTED_PRODUCT:
-            errors.append(f"main window title must be {EXPECTED_PRODUCT}")
+        if not windows or windows[0].get("title") != EXPECTED_WINDOW_TITLE:
+            errors.append(f"main window title must be {EXPECTED_WINDOW_TITLE}")
 
         if errors:
             self.fail("tauri_release_metadata", "; ".join(errors))

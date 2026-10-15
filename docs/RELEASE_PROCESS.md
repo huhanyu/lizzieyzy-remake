@@ -63,6 +63,28 @@ Release assets built without signing/notarization secrets are public validation 
 - Do not create a public tag until CI, local smoke checks, and release workflow validation pass for the target commit.
 - Do not retarget or force-push a published release tag. Create a new patch tag instead.
 
+## Installer-Only Maintainer Releases
+
+The maintainer distribution is `huhanyu/lizzieyzy-remake`, separate from the upstream/fork remote.
+Use a new immutable `remake-YYYY.MM.DD` tag (add a suffix for another release on the same date).
+The `v*` workflow above remains a separate unsigned multi-platform candidate workflow.
+Desktop npm, npm lockfile, root package, desktop Cargo, Cargo lockfile, and Tauri versions must agree.
+The product/bundle name is `LizzieYzy Next`; the established window title is `lizze-remake`.
+
+For installer-only releases:
+
+1. Verify the publication tree and diff against the last maintainer commit. Exclude local engine profiles, caches, private SGFs/datasets, secrets, and generated QA files. Preserve the development checkout and its unrelated work.
+2. Run frontend tests/build, Python tests, Rust format/clippy/workspace tests, and release contract checks. Record remaining manual/external gaps explicitly; do not mark saved-evidence smoke as a fresh GUI run.
+3. Push the reviewed source commit without force. Wait for CI before publishing the tag. Dispatch `windows-preview.yml` at that exact commit/branch; it builds lite/CPU/OpenCL NSIS installers and only uploads Actions artifacts, never mutates an old release.
+4. Build macOS with `npm --prefix apps/desktop run tauri:build -- --ci --bundles app`. Package lite and bundled-KataGo copies from the same release build. The bundled engine contains public runtime binaries/licenses, not neural weights or user configuration.
+5. Ad-hoc sign macOS bundles and verify signatures. Create DMGs, verify their checksums and read-only mounts, and check the app executable plus Applications symlink. Report the bundled engine's actual minimum macOS version.
+6. Download the matching Windows Actions artifacts. Check the run commit, installer file headers, and SHA-256 digests. Do not relabel previous installers as this release.
+7. Create a new draft release, attach only DMG/EXE installers and checksum manifests, verify all assets, then publish it as the maintainer's latest release. GitHub release status is not a claim of signed or fully accepted production readiness. Do not overwrite assets or retarget an old published tag.
+
+macOS builds here are ad-hoc signed, not Apple Developer ID signed/notarized; Windows builds are unsigned.
+Keep that warning, experimental-model limits, manual GUI gaps, and any failed checks in the notes.
+The 2026-10-15 release checks and exceptions are recorded in [release QA](qa/RELEASE_20261015.md).
+
 ## Required Secrets
 
 The dry-run workflow can run without any of these secrets. A real signed release needs platform credentials configured by repository administrators.
@@ -89,7 +111,7 @@ Tauri updater signing, when updater artifacts become in scope:
 - `TAURI_SIGNING_PRIVATE_KEY`
 - `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`, if the key is encrypted
 
-GitHub publishing for a future release workflow:
+GitHub publishing:
 
 - Prefer the default `GITHUB_TOKEN` with the minimum required `contents: write` permission.
 - Use a fine-grained PAT only if repository policy requires it.
@@ -115,7 +137,7 @@ Every uploaded artifact should be tied to the exact tag, commit SHA, platform, a
 
 The production workflow also uploads `SHA256SUMS.txt` and `SHA256SUMS-<platform>.txt` files for download verification.
 
-The expected dry-run artifact contract is `lizzieyzy-next-desktop-<version>-<platform>-dry-run` as a naming stem for handoff records, plus metadata for commit SHA and signing state. Current workflow uploads diagnostic artifacts only; production installer naming must be verified again before a public release workflow is introduced.
+The expected dry-run artifact contract is `lizzieyzy-next-desktop-<version>-<platform>-dry-run` as a naming stem for handoff records, plus metadata for commit SHA and signing state. The dry-run workflow uploads diagnostic artifacts; the tag-driven release workflow collects bundles and publishes checksums. Verify the actual production artifact names for each candidate.
 
 ## Signing and Notarization Policy
 

@@ -86,6 +86,18 @@ class ValidateReleaseAssetsTests(unittest.TestCase):
             self.assertIn("tauri_release_metadata", failures)
             self.assertIn("configured bundle icon is missing: icons/icon.ico", failures["tauri_release_metadata"])
 
+    def test_rejects_window_title_drift(self) -> None:
+        with TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._create_release_contract(root)
+            config_path = root / "apps/desktop/src-tauri/tauri.conf.json"
+            config = json.loads(config_path.read_text(encoding="utf-8"))
+            config["app"]["windows"][0]["title"] = "unrelated application"
+            write_json(config_path, config)
+            results = validate_release_assets.ReleaseAssetValidator(root).run()
+            failures = {result.name: result.detail for result in results if not result.ok}
+            self.assertIn("main window title must be lizze-remake", failures["tauri_release_metadata"])
+
     def _create_release_contract(self, root: Path) -> None:
         write_json(
             root / "apps/desktop/src-tauri/tauri.conf.json",
@@ -96,7 +108,7 @@ class ValidateReleaseAssetsTests(unittest.TestCase):
                 "identifier": "org.lizzieyzy.next",
                 "mainBinaryName": "lizzieyzy-next-desktop",
                 "build": {"frontendDist": "../dist"},
-                "app": {"windows": [{"title": "LizzieYzy Next"}]},
+                "app": {"windows": [{"title": "lizze-remake"}]},
                 "bundle": {
                     "active": True,
                     "targets": "all",

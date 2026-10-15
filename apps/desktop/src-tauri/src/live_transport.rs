@@ -28,7 +28,9 @@ impl GtpCommands for LiveTransport {
     fn send_command(&mut self, command: &str) -> Result<(), String> {
         match self {
             Self::Local(s) | Self::Remote(s) => GtpCommands::send_command(s, command),
-            Self::Cloud(s) => s.send_command(command).map_err(|error| format!("智子云发送命令失败：{error}")),
+            Self::Cloud(s) => s
+                .send_command(command)
+                .map_err(|error| format!("智子云发送命令失败：{error}")),
         }
     }
 }

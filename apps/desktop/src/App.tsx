@@ -1,3 +1,10 @@
+import { useToleranceReview } from "./hooks/useToleranceReview";
+import { loadTrainingConfig } from "./api/toleranceReview";
+import { invoke } from "@tauri-apps/api/core";
+import { ToleranceReviewPanel } from "./components/ToleranceReviewPanel";
+import {defaultGameOptions} from "./domain/humanGame";
+import type {TrainingEpisode} from "./domain/tolerance/training";
+import type {ReviewConfig} from "./domain/tolerance/types";
 import {useHumanGame} from "./hooks/useHumanGame";
 import {HumanGameControls} from "./components/HumanGameControls";
 import { OnlineKifuImport } from "./components/OnlineKifuImport";
@@ -179,6 +186,9 @@ export function App() {
   const [liveFrames, setLiveFrames] = useState<AnalysisFrameDto[]>([]);
   const [currentFilePath, setCurrentFilePath] = useState<string | null>(null);
   const [fallbackFileName, setFallbackFileName] = useState<string | null>(null);
+  const trainingOriginRef=useRef<{sgfText:string;nodeId:string|null;filePath:string|null;fileName:string|null;dirty:boolean;frames:AnalysisFrameDto[]}|null>(null);
+  const [trainingPreparing,setTrainingPreparing]=useState(false);
+  const [trainingAttempt,setTrainingAttempt]=useState<{sgfText:string;fileName:string}|null>(null);
   const [dirty, setDirty] = useState(false);
   const [documentEpoch,setDocumentEpoch] = useState(0);
   const [historyInitiallySaved,setHistoryInitiallySaved] = useState(true);
@@ -214,7 +224,7 @@ export function App() {
   const [legacyConfigApplyResult, setLegacyConfigApplyResult] = useState<backendApi.LegacyConfigMigrationApplyDto | null>(null);
   const [isLegacyConfigMigrating, setIsLegacyConfigMigrating] = useState(false);
   const [reviewWorkflowStatus, setReviewWorkflowStatus] = useState<ReviewWorkflowStatus>(() => initialReviewWorkflowStatus);
-  const { trial, busy: trialBusy, begin: beginTrial, play: playTrial, finish: finishTrial } = useTryPlay(
+  const { trial, busy: trialBusy, begin: beginTrial, play: playTrial, seek: seekTrial, finish: finishTrial } = useTryPlay(
     sgfText, selectedSgfNodeId, setMessage, commitTrial);
   const activeJobIdRef = useRef<string | null>(null);
   const analysisSessionCounterRef = useRef(0);
@@ -271,7 +281,7 @@ export function App() {
   // 把最新状态镜像进 ref，供只注册一次的事件监听与切手 effect 读取。
   const cloudEndedDuringStartRef = useRef(new Set<string>());
   const cloud = useCloudCompute({
-    canStart: () => !researchBusyRef.current && !activeJobIdRef.current && !startingAnalysisRef.current && !liveStartingRef.current && liveListenersReady && !!sgfTree && !isSgfTreeLoading,
+    canStart: () => !humanGame.active && !trainingPreparing && !researchBusyRef.current && !activeJobIdRef.current && !startingAnalysisRef.current && !liveStartingRef.current && liveListenersReady && !!sgfTree && !isSgfTreeLoading,
     prepare: async () => {
       cloudEndedDuringStartRef.current.clear();
       remoteConfigRef.current = null;
@@ -421,19 +431,19 @@ export function App() {
     sgfText, documentKey: sgfText, configurationKey: JSON.stringify([analysisConfiguration, searchOptions]),
     jobId: liveReview?.jobId ?? null, game, tree: sgfTree, positions, frames: metricFrames,
     beforeStart: async () => {
-      if(researchBusyRef.current) throw new Error("研究队列正在使用引擎。");
+      if(researchBusyRef.current) throw new Error("批量任务正在使用引擎。");
       ++liveReviewSyncSeqRef.current;
       await liveQueueRef.current.catch(() => {});
     },
     onAccepted: frame => setLiveFrames(previous => retainLiveFrame(previous, frame)),
     onReturnToForeground: () => syncLiveReviewPosition(currentMove)
   });
-  const researchQueue = useResearchQueue({
+  const analysisLifecycle = {
     acquire: async()=>{
-      if(documentEditing || trial || trialBusy || isKataGoRunning || activeJobIdRef.current || startingAnalysisRef.current || liveStartingRef.current || cloud.isPending())throw new Error('请先结束试下或引擎切换。');
+      if(researchBusyRef.current || humanGame.active || documentEditing || trial || trialBusy || isKataGoRunning || activeJobIdRef.current || startingAnalysisRef.current || liveStartingRef.current || cloud.isPending())throw new Error('请先结束试下或引擎切换。');
       researchRestoreRef.current=liveReviewRef.current ? {enabled:liveReviewEnabledRef.current,source:cloud.sourceRef.current,profile:liveProfile,remote:remoteConfigRef.current,documentKey:sgfText,frames:liveFrames} : null;
       researchBusyRef.current=true;
-      try {await cloud.disconnect();await stopCurrentLiveSession();}catch(error){researchBusyRef.current=false;throw error;}
+      try {await backgroundCurve.cancel();await fullReview.cancel({returnToForeground:false});await cloud.disconnect();await stopCurrentLiveSession();}catch(error){researchBusyRef.current=false;throw error;}
     },
     release: async()=>{
       const previous=researchRestoreRef.current;researchRestoreRef.current=null;researchBusyRef.current=false;
@@ -452,6 +462,9 @@ export function App() {
       if(previous.documentKey===currentDocumentKeyRef.current)setLiveFrames(previous.frames);
       } finally {researchRestoringRef.current=false;}
     },
+  };
+  const tolerance = useToleranceReview({sgfText,nodeId:selectedSgfNodeId,acquire:analysisLifecycle.acquire,release:async(safe,mode)=>{if(safe&&mode!=='training')await analysisLifecycle.release();else{researchRestoreRef.current=null;researchBusyRef.current=false;if(!safe)setMessage("容错任务已结束，但远端退出未确认；请核对后手动连接前景引擎。");}}});
+  const researchQueue = useResearchQueue({...analysisLifecycle,
     onCurrentResult: result=>{if(result.document.documentKey===currentDocumentKeyRef.current){setFrames(result.frames);setProblems([]);setMessage('轻量补线完成，已载入当前棋谱的完整走势。');}}
   });
   fullReviewRef.current = fullReview;
@@ -476,11 +489,14 @@ export function App() {
     });
     return () => { disposed = true; };
   }, []);
+  const [engineDefaultsReady,setEngineDefaultsReady]=useState(!isTauriRuntime());
+  useEffect(()=>{let disposed=false;if(isTauriRuntime())void loadTrainingConfig().then(config=>{if(!disposed&&config)autoStartedRef.current=true;}).catch(e=>{if(!disposed){autoStartedRef.current=true;setMessage(errorMessage(e));}}).finally(()=>{if(!disposed)setEngineDefaultsReady(true);});return()=>{disposed=true;};},[]);
   useEffect(() => {
     if (cloud.sourceRef.current === "cloud" || cloud.isPending() || !isTauriRuntime() || !liveListenersReady || !sgfTree || isSgfTreeLoading || !liveProfile || autoStartedRef.current) return;
+    if(!engineDefaultsReady)return;
     autoStartedRef.current = true;
     if (liveProfile.engine_path && liveProfile.model_path && liveProfile.config_path) void handleToggleLiveReview(liveProfile);
-  }, [liveListenersReady, sgfTree, isSgfTreeLoading, liveProfile]);
+  }, [liveListenersReady, sgfTree, isSgfTreeLoading, liveProfile,engineDefaultsReady]);
   useEffect(() => {
     if (!recordedPreview || !replayRunning || isSgfTreeLoading || !sgfTree || currentMove !== 20) return;
     let index = 0;
@@ -504,21 +520,22 @@ export function App() {
   );
   const humanGame = useHumanGame({sgfText,nodeId:selectedSgfNodeId,profile:liveProfile,message:setMessage,
     prepare:async options=>{if(trial||trialBusy||researchQueue.busyRef.current||fullReview.busyRef.current)throw new Error('请先结束试下或批量分析');
-      if(options.source!=='local' && (!liveReviewRef.current || analysisSource!==options.source))throw new Error(options.source==='cloud'?'请先在引擎设置中连接智子云，再选择智子云对弈':'请先在引擎设置中连接 SSH 引擎，再选择 SSH 对弈');
+      if(!options.analysisConfig && options.source!=='local' && (!liveReviewRef.current || analysisSource!==options.source))throw new Error(options.source==='cloud'?'请先在引擎设置中连接智子云，再选择智子云对弈':'请先在引擎设置中连接 SSH 引擎，再选择 SSH 对弈');
       autoplay.stop();await backgroundCurve.cancel();
-      if(options.source!=='local'){liveReviewEnabledRef.current=false;setLiveReviewEnabled(false);++liveReviewSyncSeqRef.current;await liveQueueRef.current.catch(()=>{});await pauseLiveReview();return liveReviewRef.current!.jobId;}
+      if(!options.analysisConfig && options.source!=='local'){liveReviewEnabledRef.current=false;setLiveReviewEnabled(false);++liveReviewSyncSeqRef.current;await liveQueueRef.current.catch(()=>{});await pauseLiveReview();return liveReviewRef.current!.jobId;}
       await cloud.disconnect();await stopCurrentLiveSession();return null;},
-    commit:async snapshot=>{await commitDocument({sgfText:snapshot.sgfText,nodeId:snapshot.nodeId,newDocument:snapshot.newDocument??false});}
+    commit:async snapshot=>{await commitDocument({sgfText:snapshot.sgfText,nodeId:snapshot.nodeId,newDocument:snapshot.newDocument??false},!!trainingOriginRef.current);},
+    onFinish:async snapshot=>{if(trainingOriginRef.current){setTrainingAttempt({sgfText:snapshot.sgfText,fileName:"training.sgf"});await restoreTrainingOrigin();}else setMessage("对局已保留在棋谱中，可保存并复盘。");}
   });
-  const isBusy = humanGame.active || researchQueue.busyRef.current || documentEditing || cloud.busy || liveStarting || isKataGoRunning || isCommentSaving || isPropertySaving || isAnnotationSaving || isMoveAppending || isNodeDeleting || isNodeReordering;
+  const isBusy = trainingPreparing || tolerance.busy || humanGame.active || researchQueue.busyRef.current || documentEditing || cloud.busy || liveStarting || isKataGoRunning || isCommentSaving || isPropertySaving || isAnnotationSaving || isMoveAppending || isNodeDeleting || isNodeReordering;
   const autoplay = useSgfAutoplay({tree:sgfTree,nodeId:selectedSgfNodeId,documentKey:sgfText,disabled:isBusy || !!trial || trialBusy,onSelect:id=>handleSgfTreeNodeSelect(id,true)});
   const documentHistory = useSgfHistory({sgfText,nodeId:selectedSgfNodeId,documentId:String(documentEpoch),initiallySaved:historyInitiallySaved,
     onRestore: snapshot=>commitDocument({sgfText:snapshot.sgfText,nodeId:snapshot.nodeId,newDocument:false})});
   useEffect(()=>setDirty(documentHistory.dirty),[documentHistory.dirty]);
-  async function commitDocument(change: DocumentCommit) {
-    if(researchBusyRef.current)throw new Error("请先结束研究队列再编辑棋谱。");
+  async function commitDocument(change: DocumentCommit, preservedCopy=false) {
+    if(researchBusyRef.current)throw new Error("请先结束批量任务再编辑棋谱。");
     if (trial || trialBusy) throw new Error('请先保存或退出试下。');
-    if (change.newDocument && dirty && !window.confirm('当前棋谱尚未保存，是否打开新棋谱？')) throw new Error('已取消，当前棋谱未改变。');
+    if (change.newDocument && dirty && !preservedCopy && !window.confirm('当前棋谱尚未保存，是否打开新棋谱？')) throw new Error('已取消，当前棋谱未改变。');
     const revision=sgfTextEditVersionRef.current;
     setDocumentEditing(true);
     try {
@@ -535,6 +552,26 @@ export function App() {
       if(change.newDocument){setCurrentFilePath(null);setFallbackFileName(null);setHistoryInitiallySaved(false);setDocumentEpoch(n=>n+1);setBoardTool('play');}
       setMessage('棋谱已更新。');
     } finally {setDocumentEditing(false);}
+  }
+  async function restoreTrainingOrigin(){
+    const origin=trainingOriginRef.current;if(!origin)return;
+    await commitDocument({sgfText:origin.sgfText,nodeId:origin.nodeId,newDocument:true},true);
+    setCurrentFilePath(origin.filePath);setFallbackFileName(origin.fileName);setHistoryInitiallySaved(!origin.dirty);setDirty(origin.dirty);setFrames(origin.frames);
+    trainingOriginRef.current=null;
+    setMessage('训练已结束，已返回原棋谱。训练棋谱可另存。');
+  }
+  async function startPositionTraining(episode:TrainingEpisode,config:ReviewConfig){
+    if(trainingOriginRef.current||trainingPreparing||isBusy||!tolerance.report||tolerance.report.request.sgfText!==sgfText)throw new Error('请先结束当前任务，或重新提取当前棋谱。');
+    setTrainingPreparing(true);
+    const original={sgfText,nodeId:selectedSgfNodeId,filePath:currentFilePath,fileName:fallbackFileName,dirty,frames};
+    try{
+      const copy=await invoke<{sgfText:string;nodeId:string;position:PositionDto}>('training_position',{sgfText,nodeId:episode.nodeId});
+      if(currentDocumentKeyRef.current!==original.sgfText)throw new Error('棋谱已改变，请重新提取。');
+      trainingOriginRef.current=original;
+      await humanGame.start({...defaultGameOptions,source:config.source,color:copy.position.to_play,size:copy.position.board_size,continuation:true,analysisConfig:structuredClone(config)}, {...copy,newDocument:true});
+      setFallbackFileName(`training-${episode.turn+1}.sgf`);
+      setMessage(`从第 ${episode.turn+1} 手前开始训练，原谱后续已隐藏。`);
+    }catch(e){if(trainingOriginRef.current)await restoreTrainingOrigin();throw e;}finally{setTrainingPreparing(false);}
   }
   async function playBoardPoint(point: {x:number;y:number}) {
     try {
@@ -828,7 +865,7 @@ export function App() {
   }
 
   async function handleSelectedGameAnalysis() {
-    if(researchBusyRef.current){setMessage("研究队列正在使用引擎，请先结束队列。");return;}
+    if(researchBusyRef.current){setMessage("批量任务正在使用引擎，请先结束队列。");return;}
     if (trial || trialBusy) { setMessage("请先退出或保存试下，再做全盘分析。"); return; }
     if (!isTauriRuntime()) {
       setMessage("全盘分析需要 Tauri 桌面应用和真实 KataGo；浏览器仅用于预览。");
@@ -854,7 +891,7 @@ export function App() {
    * 再用它返回的世代号更新前端状态——前端世代号不从本地自增，避免与 Rust 侧错位导致所有帧被丢弃。
    */
   async function syncLiveReviewPosition(_targetMove: number) {
-    if(researchBusyRef.current)return;
+    if(researchBusyRef.current || humanGame.active || trainingPreparing)return;
     if (fullReviewRef.current?.busyRef.current) return;
     const base = liveReviewRef.current;
     if (!liveReviewEnabledRef.current || !base) return;
@@ -905,12 +942,12 @@ export function App() {
 
   async function applyEngineParameters(parameters: LiveEngineParameters) {
     if (analysisSource !== "local") throw new Error("远程引擎沿用服务端配置。");
-    if(researchBusyRef.current){setMessage("研究队列正在使用引擎，请先结束队列。");return;}
+    if(researchBusyRef.current){setMessage("批量任务正在使用引擎，请先结束队列。");return;}
     ++liveReviewSyncSeqRef.current;
     await liveQueueRef.current.catch(() => {});
     try {
       await fullReviewRef.current?.cancel({returnToForeground: false});
-      if(researchBusyRef.current)throw new Error("研究队列正在使用引擎。");
+      if(researchBusyRef.current)throw new Error("批量任务正在使用引擎。");
       await configureLiveReview(parameters);
       setAnalysisConfiguration(value => value + 1);
       setLiveFrames([]); setFrames([]); // Parameters change the analysis context; old comparisons are invalid.
@@ -954,7 +991,8 @@ export function App() {
   }
 
   async function handleToggleLiveReview(profile: EngineProfileDto) {
-    if(researchBusyRef.current)throw new Error("研究队列正在使用算力。");
+    if(humanGame.active || trainingPreparing)throw new Error("请先结束当前训练或对局。");
+    if(researchBusyRef.current)throw new Error("批量任务正在使用算力。");
     remoteConfigRef.current=null;
     setAnalysisSource("local");
     if (cloud.isPending() || cloud.connected) { setMessage("请先断开智子云，再启动本地引擎。"); return; }
@@ -983,7 +1021,7 @@ export function App() {
   }
 
   async function handleAnalyzeKataGoGame(profile: EngineProfileDto, maxVisits: number) {
-    if(researchBusyRef.current){setMessage("研究队列正在使用引擎，请先结束队列。");return;}
+    if(researchBusyRef.current){setMessage("批量任务正在使用引擎，请先结束队列。");return;}
     try { await fullReviewRef.current?.cancel({returnToForeground: false}); }
     catch (error) { setMessage(errorMessage(error)); return; }
     if (cloud.sourceRef.current === "cloud" || cloud.isPending()) { setMessage("云算力目前仅支持实时分析；如需本地全盘分析，请先断开云算力并选择本地实时引擎。"); return; }
@@ -991,7 +1029,7 @@ export function App() {
     if (activeJobIdRef.current || startingAnalysisRef.current) return;
     if (liveStartingRef.current) { setMessage("实时引擎正在启动，请稍后再开始全盘分析。"); return; }
     const visits = resolveAnalysisMaxVisits(maxVisits, preferences);
-    if(researchBusyRef.current){setMessage("研究队列正在使用引擎。");return;}
+    if(researchBusyRef.current){setMessage("批量任务正在使用引擎。");return;}
     const sourceVersion = sgfTextEditVersionRef.current;
     const previousWasCancelled = reviewWorkflowStatus.phase === "cancelled";
     const sessionToken = nextAnalysisSessionToken();
@@ -1283,8 +1321,9 @@ export function App() {
   }
 
   function handleMoveSelect(moveNumber: number) {
-    if(researchBusyRef.current)return;
-    if (trial || trialBusy) { setMessage("请先退出或保存试下，再浏览原棋谱。"); return; }
+    if(researchBusyRef.current || humanGame.active || trainingPreparing)return;
+    if (trial) { seekTrial(moveNumber); return; }
+    if (trialBusy) return;
     clearTreeNodePositionOverride();
     const selectedMove = clampMoveNumberToPositions(positions, moveNumber);
     setCurrentMove(selectedMove);
@@ -1293,7 +1332,7 @@ export function App() {
   }
 
   async function handleSgfTreeNodeSelect(nodeId: string, strict=false) {
-    if(researchBusyRef.current)return;
+    if(researchBusyRef.current || humanGame.active || trainingPreparing)return;
     if (trial || trialBusy) { setMessage("请先退出或保存试下，再切换分支。"); return; }
     const node = sgfTree?.nodes.find((item) => item.id === nodeId);
     setSelectedSgfNodeId(nodeId);
@@ -2273,7 +2312,7 @@ export function App() {
           await cloud.disconnect(); await stopCurrentLiveSession(); cloud.selectLocal();
           await handleToggleLiveReview(profile);
         }}>
-        <FullGameReviewControls controller={fullReview} maxTurn={maxTreeMove} connected={!!liveReview && !trial && !researchQueue.busyRef.current} />
+        <FullGameReviewControls controller={fullReview} maxTurn={maxTreeMove} connected={!!liveReview && !trial && !humanGame.active && !researchQueue.busyRef.current} />
       </AnalysisShortcuts>}
       onToggleLiveReview={toggleSelectedLiveReview}
       isLiveReviewActive={liveReviewEnabled || (recordedPreview && replayRunning)}
@@ -2305,7 +2344,7 @@ export function App() {
           onPlayPoint={(point) => void playBoardPoint(point)}
           controls={<div className={`trial-controls${trial || humanGame.active ? " is-active" : ""}`} aria-label="试下控制">
             {humanGame.active ? <><span>{humanGame.state?.status}</span><HumanGameControls controller={humanGame} disabled={false}/></> : trial ? <>
-              <span>试下 · 第 {currentPosition.move_number} 手</span>
+              <span>试下 · 第 {trial.cursor} 手</span>
               <button disabled={trialBusy} onClick={() => void playTrial("pass")}>停一手</button>
               <button disabled={trialBusy} onClick={() => void finishTrial(true)}>保存变化</button>
               <button disabled={trialBusy} onClick={() => void finishTrial(false)}>取消试下</button>
@@ -2324,8 +2363,9 @@ export function App() {
         const saved = await handleSaveProperties(sgfTree.root_id, [{ key: "RU", values: [rules] }, { key: "KM", values: [String(komi)] }]);
         if (!saved) throw new Error("规则与贴目未保存，请查看状态提示后重试。");
       }} />}
-      chart={humanGame.hideHints ? <p className="human-game-notice">对弈期间隐藏复盘提示，结束后可查看走势和测评。</p> :
+      chart={humanGame.hideHints ? <div className="human-game-notice"><p>{humanGame.state?.options.analysisConfig?"训练中：原谱后续和复盘提示已隐藏。":"对弈期间隐藏复盘提示，结束后可查看走势和测评。"}</p><p>{humanGame.state?.status}</p>{humanGame.state?.options.analysisConfig&&<button disabled={humanGame.state.phase==="preparing"} onClick={()=>void humanGame.finish().catch(e=>setMessage(errorMessage(e)))}>结束训练，返回原谱</button>}{humanGame.state?.options.analysisConfig&&<button disabled={!["human","ended","error"].includes(humanGame.state.phase)} onClick={()=>void saveSgfDocument(null,sgfText,fallbackFileName??"training.sgf").catch(e=>setMessage(errorMessage(e)))}>另存训练棋谱</button>}</div> :
         <AnalysisModules
+          tolerance={<ToleranceReviewPanel controller={tolerance} nodeId={selectedSgfNodeId} onNodeSelect={id=>void handleSgfTreeNodeSelect(id)} disabled={isBusy || !!trial || trialBusy || isSgfTreeLoading} profile={liveProfile} remote={remoteConfigRef.current} onStartTraining={startPositionTraining} onSaveTraining={trainingAttempt?async()=>{await saveSgfDocument(null,trainingAttempt.sgfText,trainingAttempt.fileName);}:undefined}/>}
           statistics={{ documentKey: sgfText, tree: sgfTree, selectedNodeId: selectedSgfNodeId, frames: metricFrames }}
           onNodeSelect={(nodeId) => void handleSgfTreeNodeSelect(nodeId)}
           frames={effectiveFrames}
@@ -2336,7 +2376,7 @@ export function App() {
           cacheRestoreVerified={reviewWorkflowStatus.cacheRestoreVerified}
         />
       }
-      analysisPanel={humanGame.hideHints ? <div className="human-game-notice"><h2>人机对弈</h2><p>{humanGame.state?.status}</p><HumanGameControls controller={humanGame} disabled={false}/></div> :
+      analysisPanel={humanGame.hideHints ? <div className="human-game-notice"><h2>{humanGame.state?.options.analysisConfig?"局面训练":"人机对弈"}</h2><p>{humanGame.state?.status}</p><HumanGameControls controller={humanGame} disabled={false}/></div> :
           <AnalysisPanel
             showCandidates={preferences.showCandidates && !humanGame.hideHints}
             onShowCandidatesChange={showCandidates => void handlePreferencesChange({...preferences, showCandidates})}
@@ -2433,16 +2473,16 @@ export function App() {
               {sgfWorkflowLabel}
             </span>
           </section>
-          <ResearchQueuePanel onQuickCurve={profile => void backgroundCurve.start(profile)} curveBusy={backgroundCurve.busy} controller={researchQueue} current={{id:"current",name:documentName,sgfText,documentKey:sgfText}} disabled={!!trial || cloud.busy || liveStarting || isKataGoRunning}/>
+          <ResearchQueuePanel onQuickCurve={profile => void backgroundCurve.start(profile)} curveBusy={backgroundCurve.busy} controller={researchQueue} current={{id:"current",name:documentName,sgfText,documentKey:sgfText}} disabled={isBusy || !!trial}/>
           <RemoteEnginePanel disabled={isBusy || !!trial} onConnect={connectRemoteEngine}/>
           <GtpConsole disabled={!liveReview || fullReview.busyRef.current || isBusy}/>
           <CloudComputePanel reconnectStatus={cloud.reconnectStatus} connected={cloud.connected} busy={cloud.busy} onConnect={cloud.connect} onDisconnect={cloud.disconnect} />
           <label><input type="checkbox" checked={autoFillHistory} disabled={analysisSource !== "local"} onChange={event => setAutoFillHistory(event.target.checked)} />本地自动生成 1v 走势（默认关闭）</label>
-          <button disabled={backgroundCurve.busy || !!trial} onClick={() => void backgroundCurve.start()}>本地后台 1v 生成曲线</button>
+          <button disabled={isBusy || backgroundCurve.busy || !!trial} onClick={() => void backgroundCurve.start()}>本地后台 1v 生成曲线</button>
           {backgroundCurve.busy && <button onClick={() => void backgroundCurve.cancel()}>取消后台补线</button>}
           <p role="status">{backgroundCurve.status}</p>
           <p className="statistics-note">远程连接后只分析当前局面，使用远程配置。后台补线使用独立本地配置和 1 个搜索线程，完成即退出，不暂停实时分析。</p>
-          <FullGameReviewControls controller={fullReview} maxTurn={maxTreeMove} connected={!!liveReview && !trial && !researchQueue.busyRef.current} />
+          <FullGameReviewControls controller={fullReview} maxTurn={maxTreeMove} connected={!!liveReview && !trial && !humanGame.active && !researchQueue.busyRef.current} />
           <EngineSearchControls key={analysisSource} serverConfig={analysisSource !== "local"} value={searchOptions} onChange={setSearchOptions}
             cloud={cloud.source === "cloud"} disabled={!liveReview || isBusy || fullReview.busyRef.current}
             onApplyParameters={applyEngineParameters} />
@@ -2478,8 +2518,9 @@ export function App() {
       documentTitle={currentFilePath ?? documentName}
       dirty={dirty}
       sgfText={sgfText}
-      currentMove={currentMove}
-      maxMove={maxMove}
+      currentMove={trial?.cursor ?? currentMove}
+      maxMove={trial?.length ?? maxMove}
+      navigationBusy={isBusy || (!trial && trialBusy)}
       message={message}
       isBusy={isBusy || !!trial || trialBusy}
       canSave={dirty}

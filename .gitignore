@@ -12,3 +12,10 @@ apps/desktop/src-tauri/gen/
 
 # AgentTeams runtime state (team rosters, member inboxes)
 .agent-teams/
+
+# Local diagnostics and private strength-model analysis.
+__pycache__/
+*.pyc
+/release-assets/
+/katago-release.zip
+apps/desktop/src-tauri/runtime/

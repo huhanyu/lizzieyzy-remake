@@ -1,141 +1,49 @@
-# LizzieYzy Next Architecture
+# 架构与代码地图
 
-LizzieYzy Next is the Tauri 2 + Rust + TypeScript desktop architecture being built beside the Java/Swing maintenance line. The goal is to move user-visible behavior into smaller testable domains without claiming full legacy parity before the evidence exists.
+当前工作区是 Tauri 2 + Rust + React/TypeScript 应用。2026-10-04 按源码入口重整；表中表示实现位置，不能单凭文件存在推导完整功能验收。
 
-## Current System Shape
+## 数据流与职责
 
-```mermaid
-flowchart LR
-  UI["React + TypeScript UI\napps/desktop/src"] --> API["Frontend API wrappers\n@tauri-apps/api"]
-  API --> Tauri["Tauri 2 command gateway\napps/desktop/src-tauri"]
-  Tauri --> Model["app-model DTOs"]
-  Tauri --> SGF["sgf\nparse / replay / serialize"]
-  Tauri --> Go["go-core\nboard rules"]
-  Tauri --> Kata["katago-protocol\nanalysis JSONL"]
-  Tauri --> Engine["engine-manager\nprofiles / assets / process"]
-  Tauri --> Analysis["analysis-core\nmarkers / sorting"]
-  Tauri --> Cache["storage + rusqlite\nanalysis cache"]
-  Engine --> KataGo["Local KataGo process"]
-  Cache --> AppData["Tauri app data"]
-```
+界面组件 → `src/hooks` 会话/交互逻辑 → `src/api` Tauri 包装 → Rust commands → 领域 crate 或引擎 transport → DTO/事件 → 界面。原生文件、进程、网络和持久化由 Rust 管理；前端消费归一化数据，不自己解析 GTP。
 
-The UI consumes DTOs and view models. It does not consume raw KataGo JSON and does not own long-running engine processes. Rust owns file I/O, SGF parsing, process execution, cancellation, app-data persistence, and SQLite.
+| 功能 | 前端入口（apps/desktop/src） | Rust 入口 |
+|---|---|---|
+| 工作区、棋盘、树 | `components/LegacyShell.tsx`、`BoardCanvas.tsx`、`SgfNodeGraph.tsx` | `src-tauri/src/lib.rs`、`crates/sgf`、`crates/go-core` |
+| 实时分析/热图 | `api/backend.ts`、`domain/reviewFrames.ts`、`domain/analysisPolicy.ts` | `src-tauri/src/live_analysis.rs`、`live_transport.rs`、`crates/katago-protocol` |
+| 本地/SSH/智子云 | `hooks/useCloudCompute.ts`、`api/remoteGame.ts`、引擎配置组件 | `live_transport.rs`、`remote_engine.rs`、`zhizi.rs`、`crates/zhizi-socketio` |
+| 全盘分析/任务队列 | `hooks/useFullGameReview.ts`、`useResearchQueue.ts` | `lib.rs`、`crates/engine-manager` |
+| 后台 1v 补线 | `hooks/useBackgroundCurve.ts` | `background_curve.rs`（独立本地 worker） |
+| 临时试下/编辑历史 | `hooks/useTryPlay.ts`、`useSgfHistory.ts` | `try_play.rs`、`crates/sgf` |
+| 人机对弈 | `hooks/useHumanGame.ts`、`domain/humanGame.ts`、`api/remoteGame.ts` | `human_game.rs`；远端复用实时会话 |
+| 局面训练与容错复盘 | `hooks/useToleranceReview.ts`、`components/ToleranceReviewPanel.tsx`、`domain/tolerance/` | `src-tauri/src/tolerance_review/`、`crates/analysis-core/src/tolerance.rs` |
+| 常规复盘模块/棋力模型 | `components/AnalysisModules.tsx`、`components/review/`、`domain/strength/`、`domain/reviewStatistics.ts` | 前端本地模型计算，模型资源在 `apps/desktop/public/models/` |
+| 一键设置/下载/性能测试 | `hooks/useOneClickSetup.ts`、`components/setup/` | `setup_apply.rs`、`engine_assets.rs`、`engine_benchmark.rs` 等 |
+| 在线棋谱 | `api/onlineKifu.ts`、`components/OnlineKifuImport.tsx` | `online_kifu.rs`、`crates/provider-*` |
+| readboard | `api/backend.ts` | `lib.rs`、`crates/readboard-sidecar` |
+| DTO/缓存/设置 | `domain/types.ts`、API 包装 | `crates/app-model`、`crates/storage`、`lib.rs` |
 
-Provider and readboard live paths follow the same boundary rule. The React UI should enter these paths through frontend API wrappers and Tauri commands; provider HTTP parsing, readboard sidecar probing, protocol parsing, and DTO normalization belong behind Rust crate boundaries. A wired command path is repository evidence only. It is not evidence that the external Yike/Fox services, accounts, network, or a local readboard sidecar have been validated.
+Rust 应用入口均相对 `apps/desktop/`，`crates/*` 相对仓库根。具体 commands 注册从 [lib.rs](../apps/desktop/src-tauri/src/lib.rs) 下钻；不要把表中的文件名当作完整 API 契约。
 
-## Modules
+## 分析路径与状态边界
 
-### `apps/desktop`
+实时复盘使用持续 GTP 会话，批量分析使用 KataGo analysis JSONL。transport 区分本地进程、SSH 和智子云；云端增量同步的全部适用条件、ACK 和错误处理见 [专页](engine/cloud-position-sync.md)。改变其中一条路径时，不能假设其他路径具有相同的启动参数或视角约定。
 
-React + TypeScript desktop UI built with Vite. The current UI includes board rendering, SGF text/import workflow, native open/save entry points, winrate and analysis panels, cache status, and engine profile controls.
+结果必须匹配当前任务、文档/节点与 generation；发送新目标不等于引擎确认目标。保留带 ID 的 ACK 边界和准备命令错误处理，错误局面不能继续发布分析。摆子与让子保留初始棋盘语义，不能用虚构 pass 修补执棋方。
 
-The browser preview can exercise UI fallback paths and fake analysis, but it cannot perform native file dialogs, app-data profile persistence, local asset checks, or real KataGo execution.
+后台补线使用独立本地 registry 和私有配置，1v 数据用于覆盖走势，不代表深度分析质量；不要改写用户保存的引擎配置。取消、关闭、换局面要清理相应任务；改会话控制时检查前台、后台和人机对弈各自的 ownership。
 
-### `apps/desktop/src-tauri`
+HumanSL 容错任务使用独立 analysis JSONL 与结果格式，复用 Batch 独占槽；SSH 人类模型能力与现有实时路径分开验证。训练起点归并和独立续弈见 [局面训练](engine/position-training.md)；概率、后续分支、退出确认与缓存边界见 [容错复盘](engine/tolerance-review.md)。
 
-Tauri 2 command gateway. It exposes health, SGF parse/replay, native SGF read/write, fake analysis, KataGo one-shot analysis, full-game batch analysis, progress/cancel events, engine profile persistence, asset checks, and analysis cache commands.
+## SGF、人机对弈与复盘统计
 
-This layer should stay a gateway. Domain behavior belongs in crates unless it is directly about Tauri lifecycle, app data paths, command shape, or event emission.
+SGF 编辑应保留分支、节点属性、注释和摆子；原生保存后需要重新打开验证，不仅检查文本可解析。临时试下有独立游标和历史，不能把试下导航混进原棋谱主线。
 
-Provider/readboard command contracts in this batch:
+人机对弈的本地路径使用独立分析查询，远端路径复用实时会话；`useHumanGame.ts` 对会话、generation 和 request 做过期防护。普通选点取 `order=0`，HumanSL 从 `humanPolicy` 采样，缺失策略时报错；当前前端明确限制 HumanSL 使用本地模型。远端接线已经存在，旧实施文档“远端尚未接入”不能继续当作当前事实；真实远端/HumanSL 对局仍要按实际环境验收。
 
-- `provider_fetch_yike` is the Tauri entry point for Yike runtime fetch. It must validate the request provider and timeout, call the Yike provider runtime path, and return `ProviderFetchResult` on success or a typed `ProviderError` on auth, network, payload, timeout, or runtime unavailable states.
-- `provider_fetch_fox` is the Tauri entry point for Fox runtime fetch. It must validate the request provider and timeout, call the Fox provider runtime path for supported `chessid`, `uid`, and `user_name` commands, and return normalized provider DTOs or typed errors.
-- `readboard_sidecar_probe` is the Tauri entry point for checking whether the local readboard sidecar is available. Its boundary is process/path/protocol readiness; it must not imply that a target board has been synced.
-- `readboard_sidecar_sync_snapshot` is the Tauri entry point for syncing a snapshot through the sidecar. Its boundary is sidecar protocol line parsing and DTO normalization from supported inputs. Image OCR remains unavailable unless the sidecar/runtime explicitly supports it and should return a structured unsupported/not-implemented error rather than a false success.
+棋力模型保留 Java full29 特征和 20 个选择索引，模型阶段边界为 60/160；模型好手率使用 loss < 1.2，不能替换成展示质量档位。缺失或不同任务/文档/分支的数据不能拼出虚假统计，覆盖率须使用有效样本分母。原始调研和 Java 对照的完整依据保存在 [历史归档](archive/README.md)，模型测试在 `apps/desktop/tests/strength.test.mjs`。
 
-The Provider panel is the expected UI surface for provider fetch, readboard probe, and readboard sync controls. Browser-preview behavior may show local fallback or structured unavailable states, but only the Tauri desktop runtime can exercise native provider/readboard commands.
+## 外部集成与持久化
 
-### `crates/app-model`
+provider/readboard 的命令、解析器和受控夹具测试，与真实服务登录、外部客户端捕获、任意截图 OCR 是不同验证范围。改动时检查相应 Rust crate、Tauri command 和前端 wrapper，错误应清晰且不得返回过期成功数据。
 
-Shared DTOs for games, moves, positions, candidate moves, analysis frames, engine profiles, assets, health, and problem markers.
-
-### `crates/go-core`
-
-Pure Go board and rules logic. It has no UI, Tauri, storage, or process dependency.
-
-### `crates/sgf`
-
-SGF parsing, replay, and serialization. It preserves the parsed tree for compatibility paths while exposing normalized game and position DTOs to the rest of the app.
-
-### `crates/katago-protocol`
-
-KataGo analysis JSONL query/response modeling and normalization. Raw engine JSON should remain here or in engine-manager helpers; the UI should receive `AnalysisFrameDto`.
-
-### `crates/analysis-core`
-
-Analysis-derived helpers such as candidate sorting and problem marker classification.
-
-### `crates/engine-manager`
-
-Engine profile validation, command construction, asset checks, supervised KataGo execution, batch progress, timeouts, and cancellation.
-
-### Provider crates
-
-Provider crates own provider-specific URL parsing, request construction, payload parsing, and normalization. Yike live fetch must remain behind the Yike provider boundary. Fox fetch must support the documented `chessid`, `uid`, and `user_name` command shapes through the Fox provider boundary. The UI should not hand-roll provider HTTP behavior.
-
-### `crates/readboard-sidecar`
-
-The readboard sidecar crate owns launch/probe discovery, protocol line parsing, sidecar sync request/response normalization, and structured sidecar errors. Live sidecar availability depends on a local process and target client state outside repository validation.
-
-### `crates/storage`
-
-SQLite schema and storage helpers. The current user-visible cache commands live at the Tauri gateway and use SQLite in app data; long-term storage logic should continue moving behind this crate boundary as schemas stabilize.
-
-## Data Flow
-
-1. The user opens or edits SGF in the React UI.
-2. The frontend calls Tauri commands through API wrapper functions.
-3. Rust parses SGF into DTOs and replays positions through `sgf` and `go-core`.
-4. The user configures engine profiles and runs asset checks through `engine-manager`.
-5. KataGo analysis requests are generated through `katago-protocol`.
-6. `engine-manager` launches KataGo, reads analysis JSONL, emits progress, and supports cancellation.
-7. Responses are normalized into `AnalysisFrameDto` and classified by `analysis-core`.
-8. Analysis results can be persisted and reused through the SQLite cache.
-9. The UI renders board state, winrate, candidates, PVs, ownership, policy, problem markers, and cache status from DTOs.
-
-## Persistence
-
-Current app-data persistence includes:
-
-- `lizzieyzy-next-engine-profile.json` for multiple engine profile settings.
-- `analysis-cache.sqlite3` for cached analysis records.
-
-The cache key is derived from parsed SGF content and the raw SGF hash. Cache records can be filtered by profile and engine kind. This is an MVP cache contract, not a complete replacement for all legacy storage.
-
-## Production Invariants
-
-- The Rust workspace declares every crate and the Tauri desktop crate explicitly.
-- `apps/desktop/src-tauri/tauri.conf.json` uses Tauri 2 config, `org.lizzieyzy.next`, local `127.0.0.1` development URL, and `../dist` frontend output.
-- The frontend package exposes `dev`, `build`, `tauri:dev`, and `tauri:build`.
-- TypeScript depends on React and `@tauri-apps/api`; build tooling includes Vite, TypeScript, and `@tauri-apps/cli`.
-- Rust crates inherit workspace edition/rust-version metadata.
-- Golden SGF fixtures live under `tests/golden`.
-- CI and local acceptance run scaffold validation before deeper Node and Rust checks.
-- Release acceptance runs `scripts/validate_release_assets.py` to verify Tauri metadata, bundle identifiers, dry-run artifact expectations, and the safe release workflow.
-
-## Boundaries
-
-- UI code should call wrapper functions in `apps/desktop/src/api` instead of scattering raw `invoke` calls.
-- Tauri commands should return structured DTOs or explicit string errors.
-- SGF, Go rules, KataGo protocol, analysis classification, engine execution, and storage should remain separate domains.
-- Provider integrations such as Fox, Yike, and readboard should be modeled as providers or sidecars behind Rust/TypeScript boundaries, not as UI-specific shortcuts.
-- Provider/readboard code should have offline contract or domain tests before being wired into release claims. In the current batch, the acceptable repository-level claim is that offline contracts and runtime command wiring/path plumbing are implemented where the owning code lands. That is not the same as a live external provider claim.
-- Live Fox/Yike network behavior and live readboard sidecar behavior require separate environment validation with real credentials, network access, target client state, and sidecar process evidence.
-- Java/Swing files are behavior references during this migration track and should not be edited for Next scaffold validation.
-
-## Provider And Sidecar Readiness
-
-| Area | Repository-Level Evidence | Requires External Environment |
-| --- | --- | --- |
-| Yike provider | Offline request/response contract coverage and `provider_fetch_yike` runtime fetch path wired behind the provider boundary. | Real Yike account/session, network reachability, rate-limit behavior, login/session expiry, and game-fetch smoke evidence. |
-| Fox provider | Offline request/response contract coverage and `provider_fetch_fox` runtime fetch path wired for `chessid`, `uid`, and `user_name`. | Real Fox environment, network reachability, capture/session prerequisites, failure handling, and game-fetch smoke evidence. |
-| readboard probe | Domain command/DTO coverage and `readboard_sidecar_probe` path wired behind the sidecar boundary. | A real readboard sidecar process, expected port/path/process state, probe success/failure, timeout, and version evidence. |
-| readboard sync | Protocol line parsing and `readboard_sidecar_sync_snapshot` path wired behind the sidecar boundary. | A real sidecar plus target client/window state, sync behavior, stale-state handling, timeout, and restart evidence. |
-| image OCR | Structured unsupported/not-implemented error when image OCR is unavailable. | A sidecar/runtime that explicitly supports OCR, plus image fixture evidence and false-positive/timeout checks. |
-
-Docs, release notes, and handoffs should describe these as two different gates: offline contract plus runtime path is an implementation milestone; live provider/sidecar smoke is an environment milestone.
-
-## Release Readiness Meaning
-
-Passing scaffold validation and CI means the Next architecture is structurally healthy. Passing release preflight means the Tauri config and release dry-run workflow still match the expected safe metadata contract. Neither result means the Tauri app has shipped, reached full Java/Swing parity, completed live Fox/Yike/readboard migration, or produced signed production installers.
+引擎配置和缓存由 app-data 管理，缓存与 SGF/配置关联；数据库格式或配置迁移要检查旧数据和失败恢复。用户私有路径、凭据和临时文件不写进共享文档。版本、签名与安装包验证见 [发布检查](RELEASE_CHECKLIST.md)。

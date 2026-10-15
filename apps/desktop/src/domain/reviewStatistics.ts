@@ -6,19 +6,19 @@ export type ReviewMove = { nodeId: string; parentId?: string; strength?: Strengt
 export type LossMetric = 'winrateLoss' | 'scoreLoss';
 export type ReviewScope = { documentKey: string; tree: SgfTreeDto | null; selectedNodeId: string | null; frames: readonly AnalysisFrameDto[]; analysisJobId?: string | null };
 /** Selected ancestry followed by its main continuation. Siblings never enter a report. */
-export function reviewMoves(input: ReviewScope, policy: MatchPolicy = DEFAULT_MATCH_POLICY): ReviewMove[] {
-  if (!input.tree) return [];
+export function reviewContext(input: ReviewScope) {
+  if (!input.tree) return null;
   const nodes = new Map(input.tree.nodes.map(n => [n.id, n]));
   let node = nodes.get(input.selectedNodeId ?? input.tree.root_id);
   const path: typeof input.tree.nodes = [], seen = new Set<string>();
   while (node) {
-    if (seen.has(node.id)) return [];
+    if (seen.has(node.id)) return null;
     seen.add(node.id); path.push(node);
     if (!node.parent_id) break;
     node = nodes.get(node.parent_id);
   }
   path.reverse();
-  if (path[0]?.id !== input.tree.root_id) return [];
+  if (path[0]?.id !== input.tree.root_id) return null;
   node = path.at(-1);
   while (node?.child_ids?.length) {
     const next = nodes.get(node.child_ids[0]);
@@ -33,6 +33,12 @@ export function reviewMoves(input: ReviewScope, policy: MatchPolicy = DEFAULT_MA
     // Latest job wins; within one job keep deepest completed sample.
     if (!previous || previous.job_id !== frame.job_id || frame.visits >= previous.visits) bound.set(id, frame);
   }
+  return { path, bound };
+}
+export function reviewMoves(input: ReviewScope, policy: MatchPolicy = DEFAULT_MATCH_POLICY): ReviewMove[] {
+  const context = reviewContext(input);
+  if (!context) return [];
+  const { path, bound } = context;
   return path.flatMap(n => {
     if (!n.color || !n.vertex || !n.parent_id) return [];
     const before = bound.get(n.parent_id), after = bound.get(n.id);

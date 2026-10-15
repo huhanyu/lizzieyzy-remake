@@ -181,7 +181,9 @@ use super::{
     emit_live_review_ended, parse_gtp_ack, LiveReviewCommand, LiveReviewSession, SharedLiveReviewGuard,
     LIVE_REVIEW_POLL_INTERVAL,
 };
-use crate::live_transport::{GtpCommands, GtpEvents, LiveTransport};
+#[cfg(test)]
+use crate::live_transport::GtpCommands;
+use crate::live_transport::{GtpEvents, LiveTransport};
 use std::{sync::Mutex, time::Duration};
 use tauri::{AppHandle, Emitter, Manager};
 pub(super) fn acknowledged_command(
@@ -220,7 +222,14 @@ struct LiveReviewPausedPayload {
     reason: &'static str,
 }
 pub(super) fn emit_paused(app: &AppHandle, job_id: &str, generation: u64, reason: &'static str) {
-    let _ = app.emit("katago://live-review-paused", LiveReviewPausedPayload { job_id: job_id.into(), generation, reason });
+    let _ = app.emit(
+        "katago://live-review-paused",
+        LiveReviewPausedPayload {
+            job_id: job_id.into(),
+            generation,
+            reason,
+        },
+    );
 }
 pub(super) fn pause_on_limit(
     app: &AppHandle,
@@ -266,7 +275,9 @@ pub(super) async fn send_control(
         let generation = {
             let mut live = state.lock().map_err(|_| "实时分析状态不可用")?;
             if let Some(p) = &parameters {
-                if live.server_config { return Err("远程引擎沿用服务端配置，不下发本地调优参数".into()); }
+                if live.server_config {
+                    return Err("远程引擎沿用服务端配置，不下发本地调优参数".into());
+                }
                 p.commands(live.cloud)?;
             }
             let sender = live.commands.clone().ok_or("实时引擎未连接")?;
@@ -366,20 +377,30 @@ mod control_ack_tests {
     #[test]
     fn concurrent_position_requests_are_enqueued_in_generation_order() {
         let (sender, receiver) = std::sync::mpsc::channel();
-        let state = Mutex::new(LiveReviewSession { commands: Some(sender), ..Default::default() });
+        let state = Mutex::new(LiveReviewSession {
+            commands: Some(sender),
+            ..Default::default()
+        });
         std::thread::scope(|scope| {
             for turn in 0..16 {
                 let state = &state;
                 scope.spawn(move || {
-                    let request = super::super::LiveReviewPositionRequest { board_size: 19, player: Some("B".into()), ..Default::default() };
+                    let request = super::super::LiveReviewPositionRequest {
+                        board_size: 19,
+                        player: Some("B".into()),
+                        ..Default::default()
+                    };
                     super::super::set_live_review_position(state, request, turn, 10).unwrap();
                 });
             }
         });
-        let actual: Vec<u64> = receiver.try_iter().map(|command| match command {
-            LiveReviewCommand::SetPosition { generation, .. } => generation,
-            _ => panic!("unexpected command"),
-        }).collect();
+        let actual: Vec<u64> = receiver
+            .try_iter()
+            .map(|command| match command {
+                LiveReviewCommand::SetPosition { generation, .. } => generation,
+                _ => panic!("unexpected command"),
+            })
+            .collect();
         assert_eq!(actual, (1..=16).collect::<Vec<_>>());
     }
     #[test]

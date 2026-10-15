@@ -1,0 +1,291 @@
+{
+  "date": "2026-10-06",
+  "status": "complete",
+  "completed": 183,
+  "total": 183,
+  "positionCount": 179,
+  "deepCount": 4,
+  "queryCount": 19,
+  "cacheHits": 203,
+  "cleanupConfirmed": true,
+  "identity": {
+    "engineVersion": "KataGo v1.18.2\nGit revision: fd0723fdbc0e9d82cf269c9630af8c27c57c07c4\nCompile Time: Aug 29 2026 21:25:55\nUsing CUDA backend\nCompiled with CUDA version 12.8.93\nCompiled with AVX2 and FMA instructions\nCompiled to support contributing to online distributed selfplay\n",
+    "engineSha256": "b61515bf453d2029e466f8c6feb65d3e54558c5a7d41b08586a96c21e8aa49f4",
+    "modelSha256": "ad279eb0e6aa4ddf52cf24b27241d220043b31f38064b3fc3a43d5a524e6b03d",
+    "humanModelSha256": "637746e44f0efe00ad1245a50aa9bbf0716efe364c43965ead97bd6835d84ab5",
+    "configSha256": "bc1e31c30e26ef4bc9c0bfaa27f1298b9a1a0d28555def77f2a67e8f6bd8e64a",
+    "cacheSafe": true
+  },
+  "documentHash": "667a2e3539c8b433dab45b6c0d1f93e53dae154192fe477f4f1edf38a7f83146",
+  "sourceFingerprints": {
+    "apps/desktop/src/App.tsx": "3d6b929d388e73b394c83005221c7883e273f1eadedd8972bdb2c62cd22480fe",
+    "apps/desktop/src/domain/tolerance/training.ts": "9272e36dc54669e7c34953963e283bdba5ca29a7d5c99f9ef1409922dff462ce",
+    "apps/desktop/src/components/ToleranceReviewPanel.tsx": "42d7f5371adfc36ca2ccc4dabba36d24905ae32b09145aff5bb5f99550083754",
+    "apps/desktop/src/hooks/useHumanGame.ts": "828eca067c5b7d7b2a6606d81d6e8272d8cdfa3a2a00706ff6cbf4d13d627a62",
+    "apps/desktop/src-tauri/src/tolerance_review/training.rs": "89b5b52419974bde5a38bd5c23ed7b982cd069a305e0dd66719f52f514211373",
+    "apps/desktop/src-tauri/src/tolerance_review/runner.rs": "67ccba9775e26d083460a1888eeffd5553c6916c7640f40cec5961eb5336a601",
+    "crates/sgf/src/lib.rs": "f8d2e861f3efd0f73297c863a71570b33d40157ed30dc13f8ba8d702e23a0a8b"
+  },
+  "binarySha256": "818737acb75950143e09faed28a3b72fc31b77bc5fba7f83d4ee8a71cab6b9df",
+  "episodes": [
+    {
+      "startBeforeMove": 16,
+      "endMove": 16,
+      "player": "W",
+      "findings": [
+        {
+          "move": 16,
+          "vertex": "E3",
+          "stage": "training-screen"
+        }
+      ],
+      "provisional": false
+    },
+    {
+      "startBeforeMove": 26,
+      "endMove": 26,
+      "player": "W",
+      "findings": [
+        {
+          "move": 26,
+          "vertex": "C12",
+          "stage": "training-screen"
+        }
+      ],
+      "provisional": false
+    },
+    {
+      "startBeforeMove": 31,
+      "endMove": 33,
+      "player": "B",
+      "findings": [
+        {
+          "move": 31,
+          "vertex": "E17",
+          "stage": "training-screen"
+        },
+        {
+          "move": 33,
+          "vertex": "G16",
+          "stage": "training-screen"
+        }
+      ],
+      "provisional": false
+    },
+    {
+      "startBeforeMove": 34,
+      "endMove": 36,
+      "player": "W",
+      "findings": [
+        {
+          "move": 34,
+          "vertex": "D14",
+          "stage": "training-screen"
+        },
+        {
+          "move": 36,
+          "vertex": "D13",
+          "stage": "training-screen"
+        }
+      ],
+      "provisional": false
+    },
+    {
+      "startBeforeMove": 46,
+      "endMove": 46,
+      "player": "W",
+      "findings": [
+        {
+          "move": 46,
+          "vertex": "G18",
+          "stage": "training-screen"
+        }
+      ],
+      "provisional": false
+    },
+    {
+      "startBeforeMove": 58,
+      "endMove": 72,
+      "player": "W",
+      "findings": [
+        {
+          "move": 58,
+          "vertex": "F19",
+          "stage": "training-screen"
+        },
+        {
+          "move": 62,
+          "vertex": "C13",
+          "stage": "training-screen"
+        },
+        {
+          "move": 70,
+          "vertex": "G12",
+          "stage": "training-screen"
+        },
+        {
+          "move": 72,
+          "vertex": "G11",
+          "stage": "training-screen"
+        }
+      ],
+      "provisional": false
+    },
+    {
+      "startBeforeMove": 61,
+      "endMove": 67,
+      "player": "B",
+      "findings": [
+        {
+          "move": 61,
+          "vertex": "J16",
+          "stage": "training-screen"
+        },
+        {
+          "move": 63,
+          "vertex": "B13",
+          "stage": "training-screen"
+        },
+        {
+          "move": 67,
+          "vertex": "F13",
+          "stage": "training-screen"
+        }
+      ],
+      "provisional": false
+    },
+    {
+      "startBeforeMove": 80,
+      "endMove": 80,
+      "player": "W",
+      "findings": [
+        {
+          "move": 80,
+          "vertex": "K13",
+          "stage": "training-screen"
+        }
+      ],
+      "provisional": false
+    },
+    {
+      "startBeforeMove": 99,
+      "endMove": 101,
+      "player": "B",
+      "findings": [
+        {
+          "move": 99,
+          "vertex": "H9",
+          "stage": "training-screen"
+        },
+        {
+          "move": 101,
+          "vertex": "F8",
+          "stage": "training-screen"
+        }
+      ],
+      "provisional": false
+    },
+    {
+      "startBeforeMove": 102,
+      "endMove": 102,
+      "player": "W",
+      "findings": [
+        {
+          "move": 102,
+          "vertex": "M16",
+          "stage": "training-screen"
+        }
+      ],
+      "provisional": false
+    },
+    {
+      "startBeforeMove": 130,
+      "endMove": 130,
+      "player": "W",
+      "findings": [
+        {
+          "move": 130,
+          "vertex": "M10",
+          "stage": "training-screen"
+        }
+      ],
+      "provisional": false
+    },
+    {
+      "startBeforeMove": 131,
+      "endMove": 151,
+      "player": "B",
+      "findings": [
+        {
+          "move": 131,
+          "vertex": "O6",
+          "stage": "training-screen"
+        },
+        {
+          "move": 135,
+          "vertex": "P18",
+          "stage": "training-screen"
+        },
+        {
+          "move": 141,
+          "vertex": "O19",
+          "stage": "deep"
+        },
+        {
+          "move": 143,
+          "vertex": "Q11",
+          "stage": "training-screen"
+        },
+        {
+          "move": 147,
+          "vertex": "S10",
+          "stage": "deep"
+        },
+        {
+          "move": 151,
+          "vertex": "K5",
+          "stage": "deep"
+        }
+      ],
+      "provisional": false
+    },
+    {
+      "startBeforeMove": 146,
+      "endMove": 152,
+      "player": "W",
+      "findings": [
+        {
+          "move": 146,
+          "vertex": "R10",
+          "stage": "training-screen"
+        },
+        {
+          "move": 150,
+          "vertex": "P7",
+          "stage": "deep"
+        },
+        {
+          "move": 152,
+          "vertex": "L4",
+          "stage": "training-screen"
+        }
+      ],
+      "provisional": false
+    }
+  ],
+  "native": {
+    "importedMoveCount": 178,
+    "startBeforeMove": 131,
+    "copyMaxMoveAtStart": 130,
+    "humanMove": "K9",
+    "aiMove": "K6",
+    "returnToOriginal": null,
+    "export": {
+      "moveCount": 132,
+      "komi": 6.5,
+      "sha256": "f818130cb1f0c31312dfcad36b544bef412b9c4be0410e782de89c49cd398e50"
+    },
+    "historyFirst130Equal": true,
+    "sourceFileUnchanged": true
+  }
+}

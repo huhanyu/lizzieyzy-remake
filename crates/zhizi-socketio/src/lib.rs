@@ -15,7 +15,7 @@ use std::{
 use tungstenite::{stream::MaybeTlsStream, Message, WebSocket};
 use url::Url;
 const LIMIT: usize = 1024 * 1024;
-const IO_TICK: Duration = Duration::from_millis(100);
+const IO_TICK: Duration = Duration::from_millis(20);
 // Shared with the waiting caller: a partial frame may keep the network worker
 // inside read(), so the caller's hard timeout must not depend on worker progress.
 const STAGE_DNS: u8 = 0;
@@ -42,16 +42,27 @@ pub enum ZhiziEvent {
     Eof,
     ReadError(String),
 }
-fn enqueue_command(sender: &SyncSender<String>, mut command: String, stop: &AtomicBool, timeout: Duration) -> Result<(), String> {
+fn enqueue_command(
+    sender: &SyncSender<String>,
+    mut command: String,
+    stop: &AtomicBool,
+    timeout: Duration,
+) -> Result<(), String> {
     let started = Instant::now();
     loop {
-        if stop.load(Ordering::Acquire) { return Err("Cloud session closed".into()); }
+        if stop.load(Ordering::Acquire) {
+            return Err("Cloud session closed".into());
+        }
         match sender.try_send(command) {
             Ok(()) => return Ok(()),
-            Err(mpsc::TrySendError::Disconnected(_)) => return Err("Cloud command channel disconnected".into()),
+            Err(mpsc::TrySendError::Disconnected(_)) => {
+                return Err("Cloud command channel disconnected".into())
+            }
             Err(mpsc::TrySendError::Full(pending)) => command = pending,
         }
-        if started.elapsed() >= timeout { return Err("Cloud command queue drain timeout".into()); }
+        if started.elapsed() >= timeout {
+            return Err("Cloud command queue drain timeout".into());
+        }
         thread::sleep(Duration::from_millis(2));
     }
 }
@@ -117,7 +128,12 @@ impl ZhiziSession {
         if command.is_empty() || command.len() > 65536 || command.contains(['\n', '\r', '\0']) {
             return Err("Invalid GTP command".into());
         }
-        enqueue_command(&self.commands, format!("{command}\n"), &self.stop, Duration::from_secs(5))
+        enqueue_command(
+            &self.commands,
+            format!("{command}\n"),
+            &self.stop,
+            Duration::from_secs(5),
+        )
     }
     pub fn next_event_timeout(&mut self, timeout: Duration) -> Option<ZhiziEvent> {
         if self.eof {
@@ -322,7 +338,9 @@ fn run(
                 return Err("Cloud heartbeat timeout".into());
             }
             if active {
-                for _ in 0..16 {
+                // Drain a full 19x19 replay before blocking on reads, while
+                // retaining a bound so incoming heartbeats cannot starve.
+                for _ in 0..512 {
                     match commands.try_recv() {
                         Ok(command) => {
                             quit |= command.trim() == "quit";
@@ -494,18 +512,31 @@ mod tests {
             (0..365).map(|_| rx.recv().unwrap()).collect::<Vec<_>>()
         });
         let stop = AtomicBool::new(false);
-        for i in 0..365 { enqueue_command(&tx, i.to_string(), &stop, Duration::from_secs(1)).unwrap(); }
-        assert_eq!(worker.join().unwrap(), (0..365).map(|i| i.to_string()).collect::<Vec<_>>());
+        for i in 0..365 {
+            enqueue_command(&tx, i.to_string(), &stop, Duration::from_secs(1)).unwrap();
+        }
+        assert_eq!(
+            worker.join().unwrap(),
+            (0..365).map(|i| i.to_string()).collect::<Vec<_>>()
+        );
     }
     #[test]
     fn blocked_command_queue_has_bounded_wait() {
         let (tx, _rx) = mpsc::sync_channel(1);
         tx.send("first".into()).unwrap();
         let stop = AtomicBool::new(false);
-        assert_eq!(enqueue_command(&tx, "next".into(), &stop, Duration::from_millis(5)).unwrap_err(), "Cloud command queue drain timeout");
+        assert_eq!(
+            enqueue_command(&tx, "next".into(), &stop, Duration::from_millis(5)).unwrap_err(),
+            "Cloud command queue drain timeout"
+        );
         stop.store(true, Ordering::Release);
-        assert_eq!(enqueue_command(&tx, "next".into(), &stop, Duration::from_secs(1)).unwrap_err(), "Cloud session closed");
+        assert_eq!(
+            enqueue_command(&tx, "next".into(), &stop, Duration::from_secs(1)).unwrap_err(),
+            "Cloud session closed"
+        );
     }
+    // tungstenite fixes this callback's unboxed HTTP error response type.
+    #[allow(clippy::result_large_err)]
     fn mock(ready: bool) -> (String, thread::JoinHandle<()>) {
         let listener = TcpListener::bind("127.0.0.1:0").unwrap();
         let address = listener.local_addr().unwrap();

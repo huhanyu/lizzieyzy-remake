@@ -55,7 +55,9 @@ fn tuned_config(source: &str, threads: u32) -> Result<String, String> {
         result.push_str(line);
         result.push('\n');
     }
-    result.push_str(&format!("\n# Applied from KataGo benchmark\nnumSearchThreads = {threads}\nnumAnalysisThreads = 1\n"));
+    result.push_str(&format!(
+        "\n# Applied from KataGo benchmark\nnumSearchThreads = {threads}\nnumAnalysisThreads = 1\n"
+    ));
     Ok(result)
 }
 #[tauri::command]

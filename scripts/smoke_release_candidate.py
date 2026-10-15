@@ -21,7 +21,7 @@ KEY_SCRIPTS = [
     "scripts/collect_release_assets.py",
 ]
 QA_RELEASE_FILES = [
-    "docs/QA_REPORT.md",
+    "docs/qa/README.md",
     "docs/RELEASE_CHECKLIST.md",
 ]
 DANGEROUS_CLAIMS = [

@@ -1,0 +1,6 @@
+interface:
+  display_name: "项目文档审计与决策维护"
+  short_description: "从真实改动核对当前行为、保留决策原因，并审计和迁移项目文档"
+  default_prompt: "使用 $project-doc-governance 审计本次改动的文档与决策记录，核实证据并修复已授权范围内的问题。"
+policy:
+  allow_implicit_invocation: true

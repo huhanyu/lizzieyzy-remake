@@ -500,6 +500,9 @@ fn metadata_from_sgf(sgf: &str) -> ProviderGameMetadata {
         ])
         .map(ToString::to_string);
     }
+    if let Ok(document) = sgf::parse_sgf(sgf) {
+        metadata.extra.insert("komi".into(), document.komi.to_string());
+    }
     metadata
 }
 
@@ -799,6 +802,20 @@ mod tests {
         let sgf = "\\(;GM[1]C[a\\]b];B[aa]\\)";
 
         assert_eq!(sanitize_sgf(sgf), "(;GM[1]C[a\\]b];B[aa])");
+    }
+
+    #[test]
+    fn import_fixed_point_fox_komi_matches_parsed_game() {
+        let result = import_payload(ProviderImportRequest {
+            provider: ProviderKind::Fox,
+            payload: "(;GM[1]SZ[19]KM[375]AP[GNU Go:3.8]AP[foxwq];B[pd])".into(),
+            source_url: None,
+            source_id: None,
+            metadata: ProviderGameMetadata::default(),
+        })
+        .unwrap();
+        assert_eq!(result.summary.komi, Some(7.5));
+        assert_eq!(result.metadata.extra.get("komi").map(String::as_str), Some("7.5"));
     }
 
     #[test]

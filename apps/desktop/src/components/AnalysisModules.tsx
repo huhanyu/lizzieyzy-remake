@@ -1,4 +1,4 @@
-import { useId, useState, type ComponentProps } from "react";
+import { useId, useState, type ReactNode, type ComponentProps } from "react";
 import { WinrateChart } from "./WinrateChart";
 import "./AnalysisModules.css";
 import { ReviewDashboard } from "./ReviewDashboard";
@@ -10,12 +10,14 @@ const modules = [
   ["winrate", "走势"],
   ["mistakes", "问题手"],
   ["performance", "发挥水准"],
+  ["tolerance", "局面训练"],
 ] as const;
 type Module = (typeof modules)[number][0];
 
 export function AnalysisModules(
   props: ComponentProps<typeof WinrateChart> & {
     statistics?: ReviewScope;
+    tolerance?: ReactNode;
     onNodeSelect?: (id: string) => void;
   },
 ) {
@@ -64,7 +66,7 @@ export function AnalysisModules(
         aria-labelledby={`${id}-${active}`}
         tabIndex={0}
       >
-        {active === "winrate" ? (
+        {active === "tolerance" ? props.tolerance : active === "winrate" ? (
           <WinrateChart {...props} />
         ) : props.statistics ? (
           <ReviewDashboard

@@ -1,0 +1,175 @@
+{
+  "date": "2026-10-05",
+  "target": "waffle",
+  "runs": [
+    {
+      "run": "results",
+      "reportSha256": "d40431e36b45fd2bca7d33d120b4e982cbbd312e2de4fe96855f522a579cae1a",
+      "documentHash": "667a2e3539c8b433dab45b6c0d1f93e53dae154192fe477f4f1edf38a7f83146",
+      "status": "complete",
+      "cleanupConfirmed": true,
+      "identity": {
+        "engineVersion": "KataGo v1.18.2\nGit revision: fd0723fdbc0e9d82cf269c9630af8c27c57c07c4\nCompile Time: Aug 29 2026 21:25:55\nUsing CUDA backend\nCompiled with CUDA version 12.8.93\nCompiled with AVX2 and FMA instructions\nCompiled to support contributing to online distributed selfplay\n",
+        "engineSha256": "b61515bf453d2029e466f8c6feb65d3e54558c5a7d41b08586a96c21e8aa49f4",
+        "modelSha256": "ad279eb0e6aa4ddf52cf24b27241d220043b31f38064b3fc3a43d5a524e6b03d",
+        "humanModelSha256": "637746e44f0efe00ad1245a50aa9bbf0716efe364c43965ead97bd6835d84ab5",
+        "configSha256": "bc1e31c30e26ef4bc9c0bfaa27f1298b9a1a0d28555def77f2a67e8f6bd8e64a",
+        "cacheSafe": true
+      },
+      "screenVisits": 2048,
+      "deepVisits": 8192,
+      "minCandidateVisits": 128,
+      "maxSupplementalMoves": 8,
+      "queryCount": 62,
+      "branches": [
+        {
+          "rootMove": "P18",
+          "opponentReply": "A12",
+          "decisions": 3,
+          "legalNodes": 8
+        },
+        {
+          "rootMove": "P18",
+          "opponentReply": "L18",
+          "decisions": 3,
+          "legalNodes": 8
+        },
+        {
+          "rootMove": "N16",
+          "opponentReply": "R17",
+          "decisions": 3,
+          "legalNodes": 8
+        },
+        {
+          "rootMove": "N16",
+          "opponentReply": "A12",
+          "decisions": 3,
+          "legalNodes": 8
+        }
+      ]
+    },
+    {
+      "run": "quick-results",
+      "reportSha256": "8bd71b9acb57a28d9cde1815f9f92a0d46811923b404e6b7d4667ade8c863f09",
+      "documentHash": "667a2e3539c8b433dab45b6c0d1f93e53dae154192fe477f4f1edf38a7f83146",
+      "status": "complete",
+      "cleanupConfirmed": true,
+      "identity": {
+        "engineVersion": "KataGo v1.18.2\nGit revision: fd0723fdbc0e9d82cf269c9630af8c27c57c07c4\nCompile Time: Aug 29 2026 21:25:55\nUsing CUDA backend\nCompiled with CUDA version 12.8.93\nCompiled with AVX2 and FMA instructions\nCompiled to support contributing to online distributed selfplay\n",
+        "engineSha256": "b61515bf453d2029e466f8c6feb65d3e54558c5a7d41b08586a96c21e8aa49f4",
+        "modelSha256": "ad279eb0e6aa4ddf52cf24b27241d220043b31f38064b3fc3a43d5a524e6b03d",
+        "humanModelSha256": "637746e44f0efe00ad1245a50aa9bbf0716efe364c43965ead97bd6835d84ab5",
+        "configSha256": "bc1e31c30e26ef4bc9c0bfaa27f1298b9a1a0d28555def77f2a67e8f6bd8e64a",
+        "cacheSafe": true
+      },
+      "screenVisits": 512,
+      "deepVisits": 2048,
+      "minCandidateVisits": 64,
+      "maxSupplementalMoves": 1,
+      "queryCount": 24,
+      "branches": [
+        {
+          "rootMove": "P18",
+          "opponentReply": "L18",
+          "decisions": 3,
+          "legalNodes": 8
+        },
+        {
+          "rootMove": "P18",
+          "opponentReply": "A12",
+          "decisions": 3,
+          "legalNodes": 8
+        },
+        {
+          "rootMove": "N16",
+          "opponentReply": "R17",
+          "decisions": 3,
+          "legalNodes": 8
+        }
+      ]
+    }
+  ],
+  "currentSourceSha256": {
+    "crates/analysis-core/src/tolerance.rs": "0369d76271feb0e251f77a90ec7c89f784017078628d33102be3aac40314d3c2",
+    "apps/desktop/src-tauri/src/tolerance_review/types.rs": "d29685dea0a62da6f008408da63fe4d7eadc1fc9eccfbeb8d204647ad6ef57eb",
+    "apps/desktop/src-tauri/src/tolerance_review/transport.rs": "0d8c0566749f0fc25eda6d99f4bb9204a0434d5001dadbfd72502da2dfe9839b",
+    "apps/desktop/src-tauri/src/tolerance_review/runner.rs": "39f7cb4d1dba676f59f9265216de6fb2ec5d2928cdf298b5efe168d2d337a81e",
+    "apps/desktop/src-tauri/src/tolerance_review/mod.rs": "e035d661e79088a59e920c73a2822c5388465d283a0825f335735cfd7efb1040",
+    "apps/desktop/src-tauri/src/tolerance_review/ssh_worker.py": "96f4d14550cc58b38f87bf78aa610477f93c3cda2687bc201d70f7b8480e5bfc",
+    "apps/desktop/src-tauri/src/tolerance_review/tests.rs": "2d595ddd8119e4ba5e9b05da1355af0ae77299ab0b7ba74aac7c047f9384a329",
+    "apps/desktop/src-tauri/src/tolerance_review/position.rs": "6ccb3ae360ce6ea1b0be6b4d081deb90833cc471c5831393b9bafb6a28a4d5f8"
+  },
+  "cacheReplay": {
+    "hits": 24,
+    "newQueries": 0
+  },
+  "inFlightCancellationConfirmed": true,
+  "separateProcessCacheReplay": {
+    "hits": 24,
+    "newQueries": 0,
+    "durationSeconds": 6.33,
+    "cancelError": "已取消",
+    "cleanupConfirmed": true
+  },
+  "nativeWindowRuns": [
+    {
+      "jobId": "tolerance-a36269bc-1fc6-4c38-9e3b-b456025ba4bc",
+      "status": "complete",
+      "cleanupConfirmed": true,
+      "queryCount": 2,
+      "cacheHits": 24,
+      "completed": 10,
+      "total": 10,
+      "positions": 1,
+      "branches": 3,
+      "reportSha256": "fa256af04c8c68a3b048caa5af6f5d1c053b6712fb510635f00764052287311d"
+    },
+    {
+      "jobId": "tolerance-897b6d80-1c38-43b6-a6b7-29193ad8b1b0",
+      "status": "complete",
+      "cleanupConfirmed": true,
+      "queryCount": 0,
+      "cacheHits": 2,
+      "completed": 1,
+      "total": 1,
+      "positions": 1,
+      "branches": 0,
+      "reportSha256": "35c513726d8cf728b903ecc38e4c3cec3c9c5b751a1ae644aa9766b960642688"
+    },
+    {
+      "jobId": "tolerance-b1b4c131-a962-4170-aa9c-4eae2821679b",
+      "status": "cancelled",
+      "cleanupConfirmed": true,
+      "queryCount": 7,
+      "cacheHits": 0,
+      "completed": 7,
+      "total": 179,
+      "positions": 7,
+      "branches": 0,
+      "reportSha256": "116c35c6938d5bcc93835ffa6faaa972b5aa68c3a9ca8f1d8fbf29dfffe1264b"
+    },
+    {
+      "jobId": "tolerance-b3b0b63c-398d-4cc2-97ad-b23a52c56ed1",
+      "status": "complete",
+      "cleanupConfirmed": true,
+      "queryCount": 1,
+      "cacheHits": 1,
+      "completed": 1,
+      "total": 1,
+      "positions": 1,
+      "branches": 0,
+      "reportSha256": "845ab77dc04ad3a7704fa9501c59579b14bd0f8b12984e55e191823cf85a7a70"
+    }
+  ],
+  "nativeExports": {
+    "sgfMainlineMatchesOriginal": true,
+    "mainlineMoves": 178,
+    "originalFileHashUnchanged": true,
+    "jsonSha256": "4f887d4c29582d492d426636d6b2a4327dee2a530e4cd801df0d38f6764d1134",
+    "sgfSha256": "cdb3c2a484e85107636287bee6d0724d6881cf1d1a426ae64a5b3dfb65d7580e"
+  },
+  "nativeLayoutSourceSha256": {
+    "apps/desktop/src/components/AnalysisModules.css": "209ce150c6b3828ae7d4d5fa50337e41764dddedb7c9612d1b5d03e175402363",
+    "apps/desktop/src/components/ToleranceReviewPanel.css": "4aea9bcc6eeb839cf1f5ab44cdf3a83a0c26e625433d2586f5220e4866b9e994"
+  }
+}

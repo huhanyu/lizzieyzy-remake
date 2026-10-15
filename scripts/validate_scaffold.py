@@ -65,8 +65,8 @@ REQUIRED_PATHS = {
     ],
     "docs_and_tests": [
         "docs/ARCHITECTURE_NEXT.md",
-        "docs/MIGRATION_PLAN.md",
-        "docs/AGENT_EXECUTION_SUMMARY.md",
+        "docs/DEVELOPMENT.md",
+        "docs/README.md",
         "tests/golden/basic_19x19.sgf",
     ],
 }

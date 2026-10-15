@@ -235,20 +235,40 @@ mod config_tests {
     use super::*;
     #[test]
     fn private_config_normalizes_aliases_without_editing_source() {
-        let source="numSearchThreads = 4\nnumAnalysisThreads = 8\nnnMaxBatchSize = 32\nother = true\n";
-        let config=play_config(source);
+        let source = "numSearchThreads = 4\nnumAnalysisThreads = 8\nnnMaxBatchSize = 32\nother = true\n";
+        let config = play_config(source);
         assert!(config.contains("numSearchThreadsPerAnalysisThread = 4"));
         assert!(!config.contains("numSearchThreads ="));
-        assert_eq!(config.matches("numAnalysisThreads =").count(),1);
-        assert_eq!(config.matches("nnMaxBatchSize =").count(),1);
+        assert_eq!(config.matches("numAnalysisThreads =").count(), 1);
+        assert_eq!(config.matches("nnMaxBatchSize =").count(), 1);
         assert!(config.contains("other = true"));
     }
     #[test]
     fn requests_use_initial_player_and_time_override() {
-        let r=PlayRequest{id:"test".into(),profile:EngineProfileDto{name:"test".into(),engine_path:"katago".into(),model_path:None,config_path:None,working_dir:None,backend:app_model::EngineBackend::KataGoAnalysis},board_size:19,komi:7.5,rules:"chinese".into(),setup:vec![],moves:vec!["B".into(),"D4".into()],player:"black".into(),max_visits:800,max_seconds:3.,human_model:None,human_rank:None};
-        let q=query(&r).unwrap();
-        assert_eq!(q["initialPlayer"],"B");
-        assert_eq!(q["overrideSettings"]["maxTime"],3.);
+        let r = PlayRequest {
+            id: "test".into(),
+            profile: EngineProfileDto {
+                name: "test".into(),
+                engine_path: "katago".into(),
+                model_path: None,
+                config_path: None,
+                working_dir: None,
+                backend: app_model::EngineBackend::KataGoAnalysis,
+            },
+            board_size: 19,
+            komi: 7.5,
+            rules: "chinese".into(),
+            setup: vec![],
+            moves: vec!["B".into(), "D4".into()],
+            player: "black".into(),
+            max_visits: 800,
+            max_seconds: 3.,
+            human_model: None,
+            human_rank: None,
+        };
+        let q = query(&r).unwrap();
+        assert_eq!(q["initialPlayer"], "B");
+        assert_eq!(q["overrideSettings"]["maxTime"], 3.);
         assert!(q.get("maxTime").is_none());
     }
 }

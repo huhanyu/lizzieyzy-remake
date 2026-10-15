@@ -764,10 +764,16 @@ pub fn kata_analyze_line_to_frame(
 
     // Some cloud proxies omit rootInfo. A single move's visits are not the
     // position's search count; sum the reported children as a lower bound.
-    let visits = if line.root.as_ref().is_some_and(|root| root.source == RootSource::RootInfo) {
+    let visits = if line
+        .root
+        .as_ref()
+        .is_some_and(|root| root.source == RootSource::RootInfo)
+    {
         visits
     } else {
-        line.candidates.iter().fold(0u32, |sum, candidate| sum.saturating_add(candidate.visits))
+        line.candidates
+            .iter()
+            .fold(0u32, |sum, candidate| sum.saturating_add(candidate.visits))
     };
 
     AnalysisFrameDto {
@@ -1230,8 +1236,14 @@ mod tests {
         let frame = kata_analyze_line_to_frame(AnalysisJobId::nil(), &parsed, 0, PlayerColor::Black);
         assert_eq!(frame.visits, 500);
         let with_root = parse_kata_analyze_line(
-            "info move D4 visits 200 winrate 0.5 order 0 pv D4 rootInfo visits 900 winrate 0.5 scoreMean 0", 19).unwrap();
-        assert_eq!(kata_analyze_line_to_frame(AnalysisJobId::nil(), &with_root, 0, PlayerColor::Black).visits, 900);
+            "info move D4 visits 200 winrate 0.5 order 0 pv D4 rootInfo visits 900 winrate 0.5 scoreMean 0",
+            19,
+        )
+        .unwrap();
+        assert_eq!(
+            kata_analyze_line_to_frame(AnalysisJobId::nil(), &with_root, 0, PlayerColor::Black).visits,
+            900
+        );
     }
 
     #[test]

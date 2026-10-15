@@ -29,6 +29,7 @@ type Props = {
   prepare: (options: GameOptions) => Promise<string | null>;
   commit: (s: Snapshot) => Promise<void>;
   message: (s: string) => void;
+  onFinish?: (s: Snapshot) => Promise<void>;
 };
 export function useHumanGame(props: Props) {
   const latest = useRef(props);
@@ -48,6 +49,7 @@ export function useHumanGame(props: Props) {
     remoteJob: string | null;
     abort: AbortController | null;
     remotePending: Promise<unknown> | null;
+    unsafeCleanup: boolean;
   } | null>(null);
   const publish = (
     phase: NonNullable<typeof state>["phase"],
@@ -61,10 +63,14 @@ export function useHumanGame(props: Props) {
     if (!s) return;
     s.generation++;
     s.abort?.abort();
-    await s.remotePending?.catch(() => {});
+    if (s.request && s.options.analysisConfig && isTauri())
+      await invoke("training_cancel", {id:s.request}).catch(() => {});
+    await s.remotePending?.catch((e) => {
+      if (s.options.analysisConfig && String(e).includes("退出未确认")) throw e;
+    });
     const id = s.request;
     s.request = null;
-    if (id && s.options.source === "local" && isTauri())
+    if (id && !s.options.analysisConfig && s.options.source === "local" && isTauri())
       await invoke("human_game_cancel", { id });
   }
   async function append(vertex: MoveVertex) {
@@ -126,18 +132,19 @@ export function useHumanGame(props: Props) {
   async function think() {
     const s = session.current;
     if (!s) return;
+    if (s.unsafeCleanup) throw new Error("训练引擎退出未确认，请核对远端进程后再开始新计算。");
     const last = s.history.at(-1)!;
     if (last.position.to_play === s.options.color) {
       publish("human", "轮到你落子");
       return;
     }
     const generation = s.generation,
-      id = `${s.id}-${generation}-${s.history.length}`;
+      id = s.options.analysisConfig ? `training-${crypto.randomUUID()}` : `${s.id}-${generation}-${s.history.length}`;
     s.request = id;
     publish("thinking", "AI 正在思考…");
     try {
       const profile = latest.current.profile;
-      if (!profile && s.options.source === "local")
+      if (!profile && !s.options.analysisConfig && s.options.source === "local")
         throw new Error("请先配置本地 KataGo");
       const [game, tree] = await Promise.all([
         parseSgfSummary(last.sgfText),
@@ -161,7 +168,9 @@ export function useHumanGame(props: Props) {
         return;
       s.abort = new AbortController();
       const pending =
-        s.options.source !== "local"
+        s.options.analysisConfig
+          ? invoke("training_move", {id,config:s.options.analysisConfig,sgfText:last.sgfText,nodeId:last.nodeId,visits:s.options.visits,seconds:s.options.seconds})
+          : s.options.source !== "local"
           ? remoteGameMove(
               s.remoteJob!,
               position,
@@ -182,7 +191,7 @@ export function useHumanGame(props: Props) {
                 humanModel: s.options.humanModel || null,
               },
             });
-      if (s.options.source !== "local") s.remotePending = pending;
+      if (s.options.analysisConfig || s.options.source !== "local") s.remotePending = pending;
       const response = await pending;
       s.remotePending = null;
       if (
@@ -225,6 +234,7 @@ export function useHumanGame(props: Props) {
           );
       }
     } catch (e) {
+      if (String(e).includes("退出未确认")) s.unsafeCleanup = true;
       if (session.current === s && s.generation === generation) {
         s.request = null;
         s.locked = false;
@@ -232,10 +242,10 @@ export function useHumanGame(props: Props) {
       }
     }
   }
-  async function start(options: GameOptions) {
+  async function start(options: GameOptions, initial?: {sgfText:string;nodeId:string;newDocument?:boolean}) {
     if (session.current) return;
     if (!isTauri()) throw new Error("人机对弈需在桌面应用中运行");
-    if (options.source === "local" && !latest.current.profile)
+    if (!options.analysisConfig && options.source === "local" && !latest.current.profile)
       throw new Error("请先配置本地 KataGo");
     if (options.source !== "local" && options.mode === "human")
       throw new Error("HumanSL 陪练请使用本地人类模型，远端使用自身配置");
@@ -251,12 +261,13 @@ export function useHumanGame(props: Props) {
       remoteJob: null as string | null,
       abort: null as AbortController | null,
       remotePending: null as Promise<unknown> | null,
+      unsafeCleanup: false,
     };
     session.current = s;
     publish("preparing", "准备对局…");
     try {
       s.remoteJob = await latest.current.prepare(options);
-      const text = options.continuation
+      const text = initial?.sgfText ?? (options.continuation
         ? latest.current.sgfText
         : newGameSgf({
             ...DEFAULT_GAME_INFO,
@@ -266,18 +277,18 @@ export function useHumanGame(props: Props) {
             rules: options.rules,
             black: options.color === "black" ? "我" : "AI",
             white: options.color === "white" ? "我" : "AI",
-          });
+          }));
       const tree = await parseSgfTree(text);
       if (!tree) throw new Error("棋谱为空");
-      const nodeId = options.continuation
+      const nodeId = initial?.nodeId ?? (options.continuation
         ? (latest.current.nodeId ?? tree.root_id)
-        : tree.root_id;
+        : tree.root_id);
       const position = await replaySgfPositionAtNode(text, nodeId);
       if (position.errors.length) throw new Error(position.errors.join("；"));
       const snapshot = { sgfText: text, nodeId, position };
       await latest.current.commit({
         ...snapshot,
-        newDocument: !options.continuation,
+        newDocument: initial?.newDocument ?? !options.continuation,
       });
       s.history = [snapshot];
       s.locked = false;
@@ -334,18 +345,28 @@ export function useHumanGame(props: Props) {
   async function finish() {
     const s = session.current;
     if (!s || s.locked) return;
-    await cancel();
-    if (isTauri()) await invoke("human_game_cancel", { id: s.id });
-    session.current = null;
-    setState(null);
-    latest.current.message("对局已保留在棋谱中，可保存并复盘。");
+    s.locked = true;
+    publish("preparing", "正在结束对局…");
+    try {
+      await cancel();
+      if (isTauri() && !s.options.analysisConfig) await invoke("human_game_cancel", { id: s.id });
+      if (latest.current.onFinish) await latest.current.onFinish(s.history.at(-1)!);
+      else latest.current.message("对局已保留在棋谱中，可保存并复盘。");
+      session.current = null;
+      setState(null);
+    } catch (e) {
+      s.locked = false;
+      publish("error", String(e));
+      throw e;
+    }
   }
   useEffect(
     () => () => {
       const s = session.current;
       session.current = null;
       s?.abort?.abort();
-      if (s && s.options.source === "local" && isTauri())
+      if (s?.request && s.options.analysisConfig && isTauri()) void invoke("training_cancel", {id:s.request});
+      else if (s && s.options.source === "local" && isTauri())
         void invoke("human_game_cancel", { id: s.request ?? s.id });
     },
     [],

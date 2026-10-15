@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-MATRIX_PATH = "docs/LEGACY_PARITY_MATRIX.md"
+MATRIX_PATH = "docs/qa/legacy-parity.md"
 
 REQUIRED_SECTIONS = [
     "UI",

@@ -1,10 +1,12 @@
-mod human_game;
-mod online_kifu;
 mod background_curve;
 mod benchmark_settings;
-mod setup_model_probe;
-mod setup_apply;
 mod engine_benchmark;
+mod human_game;
+mod online_kifu;
+mod setup_apply;
+mod setup_model_probe;
+mod strength_policy;
+mod tolerance_review;
 use app_model::{
     AnalysisFrameDto, AppHealthDto, CandidateMoveDto, EngineBackend, EngineProfileDto, MoveVertex, NodeId,
     PointDto, PositionDto, ProviderError, ProviderErrorKind, ProviderFetchMethod, ProviderFetchRequest,
@@ -62,12 +64,12 @@ const NATIVE_MENU_EVENT_NAME: &str = "legacy://native-menu-action";
 mod analysis_review;
 mod engine_assets;
 mod engine_model_catalog;
-mod zhizi;
-mod live_transport;
 mod live_analysis;
-use live_analysis::{LiveReviewSession, tear_down_live_review, tear_down_live_review_with_app};
+mod live_transport;
+mod zhizi;
 #[cfg(test)]
 use live_analysis::*;
+use live_analysis::{tear_down_live_review, tear_down_live_review_with_app, LiveReviewSession};
 mod try_play;
 
 struct NativeMenuActionSpec {
@@ -1777,7 +1779,9 @@ fn installed_app_sgf_workflow_proof(
 }
 
 #[tauri::command]
-fn validate_sgf_tree_legality(sgf_text: String) -> Result<(), String> { sgf::edit_validation::validate_sgf_tree_legality(&sgf_text).map_err(|e| e.to_string()) }
+fn validate_sgf_tree_legality(sgf_text: String) -> Result<(), String> {
+    sgf::edit_validation::validate_sgf_tree_legality(&sgf_text).map_err(|e| e.to_string())
+}
 
 #[tauri::command]
 fn read_sgf_file(path: String) -> Result<String, String> {
@@ -2218,7 +2222,10 @@ fn load_engine_profiles_settings(app_handle: AppHandle) -> Result<EngineProfiles
         Err(err) => Err(format!("failed to read {}: {err}", path.display())),
     }?;
     if let Ok(resources) = app_handle.path().resource_dir() {
-        let engine = resources.join("runtime/katago/bin").join(if cfg!(windows) { "katago.exe" } else { "katago" });
+        let engine =
+            resources
+                .join("runtime/katago/bin")
+                .join(if cfg!(windows) { "katago.exe" } else { "katago" });
         let config = resources.join("runtime/katago/configs/analysis.cfg");
         if engine.is_file() && config.is_file() {
             for record in &mut settings.profiles {
@@ -2238,7 +2245,9 @@ fn save_engine_profiles_settings(
     app_handle: AppHandle,
     settings: EngineProfilesSettingsDto,
 ) -> Result<EngineProfilesSettingsDto, String> {
-    let _writes = benchmark_settings::PROFILE_WRITES.lock().map_err(|_| "配置状态不可用")?;
+    let _writes = benchmark_settings::PROFILE_WRITES
+        .lock()
+        .map_err(|_| "配置状态不可用")?;
     let path = engine_profile_path(&app_handle)?;
     save_engine_profiles_settings_at_path(&path, settings)
 }
@@ -5391,6 +5400,7 @@ pub fn run() {
         .manage(Mutex::new(LiveReviewSession::default()))
         .manage(try_play::TryPlayState::default())
         .manage(human_game::HumanGameEngine::default())
+        .manage(strength_policy::StrengthPolicyState::default())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
@@ -5408,10 +5418,22 @@ pub fn run() {
             // holds the `GtpSession`, and `LiveReviewSession` lives on the app, so relying on a
             // `Drop` would not run before the process is reaped.
             if let tauri::WindowEvent::Destroyed = event {
+                tolerance_review::cancel_on_close(window.app_handle());
+                strength_policy::cancel_on_close(window.app_handle());
                 tear_down_live_review_with_app(&window.app_handle().clone());
             }
         })
         .invoke_handler(tauri::generate_handler![
+            strength_policy::strength_policy_status,
+            strength_policy::strength_policy_run,
+            strength_policy::strength_policy_cancel,
+            tolerance_review::tolerance_start,
+            tolerance_review::tolerance_cancel,
+            tolerance_review::tolerance_load,
+            tolerance_review::tolerance_export,
+            tolerance_review::tolerance_config_load,
+            tolerance_review::tolerance_config_save,
+            tolerance_review::training_config_load,
             online_kifu::fetch_online_kifu,
             benchmark_settings::setup_benchmark_apply,
             setup_model_probe::setup_model_probe,
@@ -5444,8 +5466,12 @@ pub fn run() {
             replay_sgf_position_at_node,
             human_game::human_game_move,
             human_game::human_game_cancel,
+            tolerance_review::training::training_position,
+            tolerance_review::training::training_move,
+            tolerance_review::training::training_cancel,
             try_play::try_play_begin,
             try_play::try_play_move,
+            try_play::try_play_seek,
             try_play::try_play_finish,
             installed_app_sgf_workflow_proof,
             read_sgf_file,

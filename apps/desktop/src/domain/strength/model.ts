@@ -9,6 +9,7 @@ type Tree = {
 };
 export type Booster = {
   learner: {
+    feature_names?: string[];
     learner_model_param: { base_score: string; num_feature: string };
     gradient_booster: { model: { trees: Tree[] } };
   };

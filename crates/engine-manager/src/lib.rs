@@ -1288,6 +1288,12 @@ fn push_batch_response_line(
     line: String,
     options: &mut AnalysisBatchRunOptions<'_>,
 ) {
+    // Startup banners and diagnostic lines are not analysis responses. Keep
+    // malformed JSON objects for the protocol parser to report, rather than
+    // counting plain log output toward completion or parsing it as JSON.
+    if !line.trim_start().starts_with('{') {
+        return;
+    }
     let response_index = response_lines.len() + 1;
     if response_index <= options.expected_responses {
         if let Some(on_progress) = options.on_progress.as_deref_mut() {
@@ -1837,6 +1843,22 @@ mod tests {
         assert_eq!(result.response_jsonl, r#"{"id":"ok"}"#);
         assert_eq!(result.exit_code, Some(0));
         assert!(result.stderr.contains("debug line"));
+    }
+
+    #[test]
+    #[cfg(unix)]
+    fn analysis_batch_ignores_stdout_diagnostics() {
+        let temp_dir = TestTempDir::new("batch-diagnostics");
+        let spec = fake_engine_spec(
+            &temp_dir,
+            r#"read line; printf 'Loading model...\n\n'; printf '{"id":"x","turnNumber":0}\n'; printf 'Backend ready\n'; printf '{"id":"x","turnNumber":1}\n'"#,
+        );
+        let result = run_katago_analysis_batch(&spec, r#"{"id":"x"}"#, 2, Duration::from_secs(2)).unwrap();
+        assert_eq!(result.response_jsonl_lines.len(), 2);
+        assert!(result
+            .response_jsonl_lines
+            .iter()
+            .all(|line| line.starts_with('{')));
     }
 
     #[test]

@@ -188,7 +188,7 @@ fn remove_asset(app: &AppHandle, id: &str) -> Result<(), String> {
         return Err("请先结束引擎连接，再清理资源，避免删除运行中的模型或引擎".into());
     }
 
-    valid_id(&id)?;
+    valid_id(id)?;
     if app
         .state::<AssetDownloads>()
         .0
@@ -198,7 +198,7 @@ fn remove_asset(app: &AppHandle, id: &str) -> Result<(), String> {
     {
         return Err("请先取消正在进行的下载".into());
     }
-    let path = root(&app)?.join(id);
+    let path = root(app)?.join(id);
     let metadata = fs::symlink_metadata(&path).map_err(|e| e.to_string())?;
     if !metadata.is_dir() || metadata.file_type().is_symlink() || !path.join("manifest.json").is_file() {
         return Err("只能删除应用受管安装资源".into());

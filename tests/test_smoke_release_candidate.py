@@ -131,7 +131,7 @@ def create_release_candidate_fixture(
         if rel != "scripts/smoke_user_flows.py":
             write(root / rel, "#!/usr/bin/env python3\n")
     write(
-        root / "docs/QA_REPORT.md",
+        root / "docs/qa/README.md",
         """
         # QA Report
 

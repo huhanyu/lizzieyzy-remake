@@ -66,7 +66,9 @@ impl ZhiziState {
     pub fn forget_after_logout(&self) -> Result<(), String> {
         let session = self.inner.lock().unwrap_or_else(|p| p.into_inner());
         // A late logout worker must not delete credentials saved by a newer completed login.
-        if session.credentials.is_none() { cloud_keychain::forget()?; }
+        if session.credentials.is_none() {
+            cloud_keychain::forget()?;
+        }
         Ok(())
     }
     fn expire(&self, generation: u64) {
@@ -82,7 +84,11 @@ impl ZhiziState {
         let (generation, token, args) = {
             let session = self.inner.lock().unwrap_or_else(|p| p.into_inner());
             let credentials = session.credentials.as_ref().ok_or("请先登录智子云")?;
-            (session.generation, credentials.token.clone(), session.selection.args()?)
+            (
+                session.generation,
+                credentials.token.clone(),
+                session.selection.args()?,
+            )
         };
         let result = post(
             "/api/cluster/account/fetch-socketio-token",
@@ -242,10 +248,14 @@ pub async fn zhizi_login(
         // Hold the generation lock during persistence so logout/new login cannot save an old account.
         {
             let session = state.inner.lock().unwrap_or_else(|p| p.into_inner());
-            if session.generation != generation { return Err(STALE.into()); }
+            if session.generation != generation {
+                return Err(STALE.into());
+            }
             if remember.unwrap_or(false) {
                 cloud_keychain::save(&account, &token)?;
-            } else { cloud_keychain::forget()?; }
+            } else {
+                cloud_keychain::forget()?;
+            }
         }
         let mut status = state.finish_login(generation, account, token)?;
         status.remembered = remember.unwrap_or(false);
@@ -259,15 +269,25 @@ pub fn zhizi_status(state: tauri::State<'_, ZhiziState>) -> ZhiziStatus {
     state.status()
 }
 #[tauri::command]
-pub fn zhizi_catalog() -> serde_json::Value { cloud_selection::catalog() }
-
-#[tauri::command]
-pub fn zhizi_get_selection(state: tauri::State<'_, ZhiziState>) -> CloudSelection {
-    state.inner.lock().unwrap_or_else(|p| p.into_inner()).selection.clone()
+pub fn zhizi_catalog() -> serde_json::Value {
+    cloud_selection::catalog()
 }
 
 #[tauri::command]
-pub fn zhizi_set_selection(selection: CloudSelection, state: tauri::State<'_, ZhiziState>) -> Result<(), String> {
+pub fn zhizi_get_selection(state: tauri::State<'_, ZhiziState>) -> CloudSelection {
+    state
+        .inner
+        .lock()
+        .unwrap_or_else(|p| p.into_inner())
+        .selection
+        .clone()
+}
+
+#[tauri::command]
+pub fn zhizi_set_selection(
+    selection: CloudSelection,
+    state: tauri::State<'_, ZhiziState>,
+) -> Result<(), String> {
     selection.args()?;
     let mut session = state.inner.lock().unwrap_or_else(|p| p.into_inner());
     session.generation = session.generation.wrapping_add(1);
@@ -280,17 +300,22 @@ pub async fn zhizi_restore_login(state: tauri::State<'_, ZhiziState>) -> Result<
     let state = state.inner().clone();
     let generation = state.begin_login();
     tauri::async_runtime::spawn_blocking(move || {
-        let Some((account, token)) = cloud_keychain::load()? else { return Ok(state.status()); };
+        let Some((account, token)) = cloud_keychain::load()? else {
+            return Ok(state.status());
+        };
         let mut status = state.finish_login(generation, account, token)?;
         status.remembered = true;
         Ok(status)
-    }).await.map_err(|_| "无法读取钥匙串".to_owned())?
+    })
+    .await
+    .map_err(|_| "无法读取钥匙串".to_owned())?
 }
-
 
 #[tauri::command]
 pub async fn zhizi_forget_login() -> Result<(), String> {
-    tauri::async_runtime::spawn_blocking(cloud_keychain::forget).await.map_err(|_| "无法删除钥匙串凭据".to_owned())?
+    tauri::async_runtime::spawn_blocking(cloud_keychain::forget)
+        .await
+        .map_err(|_| "无法删除钥匙串凭据".to_owned())?
 }
 
 #[cfg(test)]

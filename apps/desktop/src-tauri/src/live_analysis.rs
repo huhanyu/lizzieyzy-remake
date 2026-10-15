@@ -1,16 +1,16 @@
 use super::{zhizi, AnalysisJobKind, AnalysisJobRegistry};
+#[path = "gtp_console.rs"]
+mod console;
 #[path = "live_controls.rs"]
 mod controls;
 #[path = "remote_engine.rs"]
 mod remote;
-#[path = "gtp_console.rs"]
-mod console;
-pub(super) use remote::RemoteEngineConfig;
 use crate::live_transport::{GtpCommands, LiveTransport};
-use controls::{acknowledged_command, pause_on_limit, send_control};
 use app_model::{AnalysisFrameDto, EngineBackend, EngineProfileDto};
+use controls::{acknowledged_command, pause_on_limit, send_control};
 pub(super) use controls::{LiveEngineParameters, LiveSearchOptions};
 use engine_manager::{build_command_spec, AnalysisCancelToken};
+pub(super) use remote::RemoteEngineConfig;
 use serde::{Deserialize, Serialize};
 use std::{sync::Mutex, time::Duration};
 use tauri::{AppHandle, Emitter, Manager, State};
@@ -80,7 +80,11 @@ pub(super) enum LiveReviewCommand {
         parameters: LiveEngineParameters,
         reply: std::sync::mpsc::Sender<Result<(), String>>,
     },
-    Console { generation: u64, command: String, reply: std::sync::mpsc::Sender<Result<String, String>> },
+    Console {
+        generation: u64,
+        command: String,
+        reply: std::sync::mpsc::Sender<Result<String, String>>,
+    },
     /// Tear the session down (engine process included).
     Shutdown,
 }
@@ -399,6 +403,7 @@ impl LiveReviewCommandIds {
 /// `generation` proves that every earlier command has completed, so an `info` line seen after it
 /// cannot be pipelined output from a superseded request. The final id is returned so the caller
 /// knows which acknowledgement to wait for.
+#[cfg(test)]
 pub(super) fn apply_live_review_position(
     session: &mut impl GtpCommands,
     request: &LiveReviewPositionRequest,
@@ -496,6 +501,75 @@ fn apply_live_review_position_with_options(
     Ok(LiveReviewCommandIds {
         first: first_id,
         analyze: analyze_id,
+    })
+}
+
+/// Reuse an acknowledged cloud board only when its rules and setup match.
+/// GTP undo preserves the real history at the shared branch point.
+fn apply_cloud_position_delta(
+    session: &mut impl GtpCommands,
+    previous: Option<&LiveReviewPositionRequest>,
+    request: &LiveReviewPositionRequest,
+    interval: u32,
+    next_id: &mut u64,
+    options: &LiveSearchOptions,
+) -> Result<LiveReviewCommandIds, String> {
+    // Explicit PL can make KataGo reset history. Such positions must be rebuilt
+    // rather than assuming every recorded move is still undoable.
+    let history_matches_player = |position: &LiveReviewPositionRequest| {
+        if position.moves.len() < 2 {
+            return true;
+        }
+        let last_color = &position.moves[position.moves.len() - 2];
+        position.player.as_deref().is_none_or(|player| {
+            live_review_player_color(Some(player)) != live_review_player_color(Some(last_color))
+        })
+    };
+    let previous = previous.filter(|old| {
+        history_matches_player(old)
+            && history_matches_player(request)
+            && old.board_size == request.board_size
+            && old.setup == request.setup
+            && old.rules == request.rules
+            && old.komi == request.komi
+            && old.handicap == request.handicap
+    });
+    let Some(old) = previous else {
+        return apply_live_review_position_with_options(session, request, interval, next_id, options);
+    };
+    options.validate(request.board_size, request.player.as_deref())?;
+    for pair in request.moves.chunks(2) {
+        live_review_move_pair(pair, &request.moves)?;
+    }
+    let shared = old
+        .moves
+        .chunks_exact(2)
+        .zip(request.moves.chunks_exact(2))
+        .take_while(|(a, b)| a == b)
+        .count();
+    let undo_count = old.moves.len() / 2 - shared;
+    // Large backwards jumps are cheaper and safer to reconstruct from the root.
+    if undo_count > request.moves.len() / 2 + 4 {
+        return apply_live_review_position_with_options(session, request, interval, next_id, options);
+    }
+    let first = *next_id;
+    let mut commands = vec!["stop".to_string()];
+    commands.extend((0..undo_count).map(|_| "undo".to_string()));
+    for pair in request.moves[shared * 2..].chunks_exact(2) {
+        commands.push(format!("play {} {}", pair[0], pair[1]));
+    }
+    commands.push(format!(
+        "{}{}",
+        live_review_kata_analyze_command(request.player.as_deref(), interval),
+        options.suffix(request.player.as_deref())
+    ));
+    for command in commands {
+        session.send_command(&format!("{} {command}", *next_id))?;
+        *next_id = next_id.saturating_add(1);
+    }
+    Ok(LiveReviewCommandIds {
+        first,
+        analyze: *next_id - 1,
     })
 }
 
@@ -609,11 +683,21 @@ pub(super) async fn katago_console_query(app_handle: AppHandle, command: String)
         {
             let mut live = state.lock().map_err(|_| "实时会话不可用")?;
             let sender = live.commands.clone().ok_or("请先连接引擎")?;
-            let generation=live.publish_request(None, None);
-            sender.send(LiveReviewCommand::Console { generation, command, reply }).map_err(|_| "实时会话已结束")?;
+            let generation = live.publish_request(None, None);
+            sender
+                .send(LiveReviewCommand::Console {
+                    generation,
+                    command,
+                    reply,
+                })
+                .map_err(|_| "实时会话已结束")?;
         }
-        receiver.recv_timeout(Duration::from_secs(12)).map_err(|_| "控制台查询未确认")?
-    }).await.map_err(|_| "控制台任务失败".to_owned())?
+        receiver
+            .recv_timeout(Duration::from_secs(12))
+            .map_err(|_| "控制台查询未确认")?
+    })
+    .await
+    .map_err(|_| "控制台任务失败".to_owned())?
 }
 
 #[tauri::command]
@@ -645,6 +729,8 @@ pub(super) fn run_live_review_owner(
     // Session-wide monotonic GTP command id; ids are unique so an acknowledgement can never be
     // confused with an older request's boundary.
     let mut next_command_id: u64 = 1;
+    let mut synchronized_position: Option<LiveReviewPositionRequest> = None;
+    let mut pending_position: Option<LiveReviewPositionRequest> = None;
     let mut active_options = LiveSearchOptions::default();
     let mut started_at: Option<std::time::Instant> = None;
 
@@ -660,26 +746,43 @@ pub(super) fn run_live_review_owner(
                     interval_centisec,
                     options,
                 }) => {
+                    if generation != guard_snapshot(&guard).0 {
+                        continue;
+                    }
                     started_at = None;
                     active_options = options;
                     board_size = request.board_size;
                     line_generation = generation;
                     line_target_turn = Some(target_turn);
-                    if let Err(message) = apply_live_review_position_with_options(
-                        &mut session,
-                        &request,
-                        interval_centisec,
-                        &mut next_command_id,
-                        &active_options,
-                    )
-                    .map(|ids| pending_ids = Some(ids))
-                    {
+                    let previous = synchronized_position.take();
+                    let result = if session.is_cloud() {
+                        apply_cloud_position_delta(
+                            &mut session,
+                            previous.as_ref(),
+                            &request,
+                            interval_centisec,
+                            &mut next_command_id,
+                            &active_options,
+                        )
+                    } else {
+                        apply_live_review_position_with_options(
+                            &mut session,
+                            &request,
+                            interval_centisec,
+                            &mut next_command_id,
+                            &active_options,
+                        )
+                    };
+                    pending_position = Some(request);
+                    if let Err(message) = result.map(|ids| pending_ids = Some(ids)) {
                         emit_live_review_ended(&app_handle, &job_id, generation, &message);
                         let _ = session.close();
                         return;
                     }
                 }
                 Ok(LiveReviewCommand::Pause { reply }) => {
+                    synchronized_position = None;
+                    pending_position = None;
                     pending_ids = None;
                     started_at = None;
                     line_target_turn = None;
@@ -698,6 +801,8 @@ pub(super) fn run_live_review_owner(
                     }
                 }
                 Ok(LiveReviewCommand::Configure { parameters, reply }) => {
+                    synchronized_position = None;
+                    pending_position = None;
                     pending_ids = None;
                     started_at = None;
                     line_target_turn = None;
@@ -720,14 +825,25 @@ pub(super) fn run_live_review_owner(
                     });
                     let _ = reply.send(result);
                 }
-                Ok(LiveReviewCommand::Console { generation, command, reply }) => {
+                Ok(LiveReviewCommand::Console {
+                    generation,
+                    command,
+                    reply,
+                }) => {
+                    synchronized_position = None;
+                    pending_position = None;
                     pending_ids = None;
                     started_at = None;
                     line_target_turn = None;
                     if let Err(error) = acknowledged_command(&mut session, &mut next_command_id, "stop") {
                         let _ = reply.send(Err(error));
                         let _ = session.close();
-                        emit_live_review_ended(&app_handle, &job_id, guard_snapshot(&guard).0, "控制台暂停未确认，连接已关闭");
+                        emit_live_review_ended(
+                            &app_handle,
+                            &job_id,
+                            guard_snapshot(&guard).0,
+                            "控制台暂停未确认，连接已关闭",
+                        );
                         return;
                     }
                     controls::emit_paused(&app_handle, &job_id, generation, "console");
@@ -746,7 +862,16 @@ pub(super) fn run_live_review_owner(
         }
 
         if started_at.is_some_and(|start| active_options.reached(0, start.elapsed().as_secs_f64())) {
-            if !pause_on_limit(&app_handle, &job_id, line_generation, &guard, &mut session, &mut next_command_id) { return; }
+            if !pause_on_limit(
+                &app_handle,
+                &job_id,
+                line_generation,
+                &guard,
+                &mut session,
+                &mut next_command_id,
+            ) {
+                return;
+            }
             started_at = None;
             line_target_turn = None;
         }
@@ -790,6 +915,7 @@ pub(super) fn run_live_review_owner(
                         _ => false,
                     };
                     if open {
+                        synchronized_position = pending_position.take();
                         pending_ids = None;
                         publish_stream_ready(&guard, line_generation);
                         started_at = Some(std::time::Instant::now());
@@ -885,14 +1011,34 @@ pub(super) fn katago_start_live_review(
 }
 
 #[tauri::command]
-pub(super) async fn ssh_start_live_review(app_handle: AppHandle, config: RemoteEngineConfig, board_size: u8, turn: u32, interval_centisec: u32) -> Result<String, String> {
+pub(super) async fn ssh_start_live_review(
+    app_handle: AppHandle,
+    config: RemoteEngineConfig,
+    board_size: u8,
+    turn: u32,
+    interval_centisec: u32,
+) -> Result<String, String> {
     let spec = remote::ssh_spec(&config)?;
     tauri::async_runtime::spawn_blocking(move || {
         let state = app_handle.state::<Mutex<LiveReviewSession>>();
         let registry = app_handle.state::<AnalysisJobRegistry>();
-        start_live_transport(&app_handle, &state, &registry, board_size, turn, interval_centisec, false,
-            move || engine_manager::GtpSession::start(&spec).map(LiveTransport::Remote).map_err(|_| "SSH 引擎启动失败；请确认系统 SSH 密钥、known_hosts 和远程路径".into()))
-    }).await.map_err(|_| "SSH 连接任务失败".to_owned())?
+        start_live_transport(
+            &app_handle,
+            &state,
+            &registry,
+            board_size,
+            turn,
+            interval_centisec,
+            false,
+            move || {
+                engine_manager::GtpSession::start(&spec)
+                    .map(LiveTransport::Remote)
+                    .map_err(|_| "SSH 引擎启动失败；请确认系统 SSH 密钥、known_hosts 和远程路径".into())
+            },
+        )
+    })
+    .await
+    .map_err(|_| "SSH 连接任务失败".to_owned())?
 }
 
 pub(super) fn start_live_review_session(
@@ -924,6 +1070,7 @@ pub(super) fn start_live_review_session(
     )
 }
 
+#[allow(clippy::too_many_arguments)] // Shared lifecycle boundary for local, SSH, and cloud transports.
 fn start_live_transport(
     app_handle: &AppHandle,
     state: &Mutex<LiveReviewSession>,
@@ -1141,6 +1288,7 @@ pub(super) fn katago_live_review_set_position(
     )
 }
 
+#[cfg(test)]
 pub(super) fn set_live_review_position(
     state: &Mutex<LiveReviewSession>,
     request: LiveReviewPositionRequest,
@@ -1187,14 +1335,15 @@ fn set_live_review_position_with_options(
         let player = live_review_player_color(request.player.as_deref());
         let generation = live.publish_request(Some(turn), player);
         // Enqueue under the same lock as publication, preserving generation order against pause/configure.
-        sender.send(LiveReviewCommand::SetPosition {
-            generation,
-            target_turn: turn,
-            request,
-            interval_centisec,
-            options,
-        })
-        .map_err(|_| "live review session has ended".to_string())?;
+        sender
+            .send(LiveReviewCommand::SetPosition {
+                generation,
+                target_turn: turn,
+                request,
+                interval_centisec,
+                options,
+            })
+            .map_err(|_| "live review session has ended".to_string())?;
         generation
     };
     Ok(generation)
@@ -1306,6 +1455,109 @@ fn ensure_live_slot_available(registry: &AnalysisJobRegistry) -> Result<(), Stri
 #[cfg(test)]
 mod cloud_tests {
     use super::*;
+    #[derive(Default)]
+    struct Recorder(Vec<String>);
+    impl GtpCommands for Recorder {
+        fn send_command(&mut self, command: &str) -> Result<(), String> {
+            self.0.push(command.into());
+            Ok(())
+        }
+    }
+    fn position(moves: &[&str]) -> LiveReviewPositionRequest {
+        LiveReviewPositionRequest {
+            board_size: 19,
+            moves: moves.iter().map(|s| s.to_string()).collect(),
+            komi: Some(7.5),
+            rules: Some("chinese".into()),
+            player: Some(if moves.len() / 2 % 2 == 0 { "B" } else { "W" }.into()),
+            ..Default::default()
+        }
+    }
+    #[test]
+    fn cloud_delta_replays_only_changed_moves_and_preserves_boundary() {
+        let old = position(&["B", "D4", "W", "Q16"]);
+        let next = position(&["B", "D4", "W", "Q16", "B", "Q4"]);
+        let mut recorder = Recorder::default();
+        let mut id = 100;
+        let ids =
+            apply_cloud_position_delta(&mut recorder, Some(&old), &next, 10, &mut id, &Default::default())
+                .unwrap();
+        assert_eq!(recorder.0.len(), 3);
+        assert_eq!(&recorder.0[..2], ["100 stop", "101 play B Q4"]);
+        assert_eq!(ids.analyze, 102);
+        recorder.0.clear();
+        apply_cloud_position_delta(&mut recorder, Some(&next), &old, 10, &mut id, &Default::default())
+            .unwrap();
+        assert_eq!(recorder.0.len(), 3);
+        assert!(recorder.0[1].ends_with(" undo"));
+        recorder.0.clear();
+        let branch = position(&["B", "D4", "W", "Q4"]);
+        apply_cloud_position_delta(
+            &mut recorder,
+            Some(&old),
+            &branch,
+            10,
+            &mut id,
+            &Default::default(),
+        )
+        .unwrap();
+        assert_eq!(recorder.0.len(), 4);
+        assert!(recorder.0[1].ends_with(" undo"));
+        assert!(recorder.0[2].ends_with("play W Q4"));
+    }
+    #[test]
+    fn cloud_delta_rebuilds_when_settings_changed_or_board_unconfirmed() {
+        let old = position(&["B", "D4"]);
+        let mut changed = old.clone();
+        changed.komi = Some(6.5);
+        for previous in [Some(&old), None] {
+            let mut recorder = Recorder::default();
+            apply_cloud_position_delta(&mut recorder, previous, &changed, 10, &mut 1, &Default::default())
+                .unwrap();
+            assert!(recorder.0.iter().any(|s| s.ends_with("clear_board")));
+            assert!(recorder.0.iter().any(|s| s.ends_with("komi 6.5")));
+        }
+    }
+    #[test]
+    #[ignore = "requires explicit local KataGo paths"]
+    fn real_cloud_delta_matches_full_replay_board() {
+        use crate::live_transport::LiveTransport;
+        let profile = EngineProfileDto {
+            name: "delta QA".into(),
+            engine_path: std::env::var("CURVE_QA_ENGINE").unwrap(),
+            model_path: Some(std::env::var("CURVE_QA_MODEL").unwrap()),
+            config_path: Some(std::env::var("CURVE_QA_CONFIG").unwrap()),
+            working_dir: None,
+            backend: EngineBackend::KataGoGtp,
+        };
+        let mut session = LiveTransport::Local(
+            engine_manager::GtpSession::start(&engine_manager::build_command_spec(&profile).unwrap())
+                .unwrap(),
+        );
+        let mut id = 1;
+        let mut old = position(&["B", "D4", "W", "Q16"]);
+        apply_cloud_position_delta(&mut session, None, &old, 10, &mut id, &Default::default()).unwrap();
+        for moves in [
+            vec!["B", "D4", "W", "Q16", "B", "Q4"],
+            vec!["B", "D4"],
+            vec!["B", "D4", "W", "D16"],
+        ] {
+            let next = position(&moves);
+            apply_cloud_position_delta(&mut session, Some(&old), &next, 10, &mut id, &Default::default())
+                .unwrap();
+            acknowledged_command(&mut session, &mut id, "stop").unwrap();
+            let delta = console::query(&mut session, &mut id, "showboard").unwrap();
+            apply_live_review_position_with_options(&mut session, &next, 10, &mut id, &Default::default())
+                .unwrap();
+            acknowledged_command(&mut session, &mut id, "stop").unwrap();
+            let full = console::query(&mut session, &mut id, "showboard").unwrap();
+            // The response command ids differ; compare the full board body.
+            assert_eq!(delta.split_once(' ').unwrap().1, full.split_once(' ').unwrap().1);
+            old = next;
+        }
+        session.close().unwrap();
+    }
+
     #[test]
     fn logged_out_allocation_fails_before_network() {
         let auth = zhizi::ZhiziState::default();
@@ -1322,4 +1574,3 @@ mod cloud_tests {
         assert!(ensure_live_slot_available(&registry).is_ok());
     }
 }
-

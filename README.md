@@ -4,6 +4,8 @@
 
 本仓库是持续开发中的重制版本，不代表原项目官方发布，也尚未实现 Java 版的全部功能。
 
+开发与文档维护从 [文档导航](docs/README.md) 和 [维护指南](docs/MAINTENANCE.md) 开始；接手项目的模型先读 [AGENTS.md](AGENTS.md)。
+
 ## 界面预览
 
 ### 棋盘与复盘工作区
@@ -84,7 +86,7 @@ Provider and readboard work in this batch should be treated as offline contract/
 - `crates/engine-manager`: Engine command specs, asset checks, process execution, and cancellation.
 - `crates/storage`: SQLite storage/cache schema helpers.
 - `docs/ARCHITECTURE_NEXT.md`: Current Next architecture and module boundaries.
-- `docs/MIGRATION_PLAN.md`: Completed and pending migration work.
+- `docs/README.md`: Development handoff, current module docs, and validation status.
 - `docs/DEVELOPMENT.md`: Local development and smoke validation commands.
 - `docs/RELEASE_CHECKLIST.md`: Release-readiness checklist and manual acceptance flow.
 
@@ -183,7 +185,7 @@ Windows 分版本构建入口为 `.github/workflows/windows-preview.yml`。仓�
 ## Documentation
 
 - [Next architecture](docs/ARCHITECTURE_NEXT.md)
-- [Migration plan](docs/MIGRATION_PLAN.md)
+- [Development handoff](docs/README.md)
 - [Development guide](docs/DEVELOPMENT.md)
 - [Release checklist](docs/RELEASE_CHECKLIST.md)
 - [Troubleshooting](docs/TROUBLESHOOTING.md)

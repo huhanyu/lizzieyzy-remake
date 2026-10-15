@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "files": {
+    "SKILL.md": "7c1f5a1329f1ed5941291c965eb06e510a400f4e9e888876ad18e94390babdd2",
+    "agents/openai.yaml": "b91c2f92a0ca67a8687e33156d7252a77f240bb71952c7440f950b91ac9268dc",
+    "references/example.md": "f65d6d5dde650751a1d345b98b7b4d3b5bf8020851f737da17a41078ded3e252",
+    "references/methodology.md": "e8e25d942b438d73a0dfffe6a41e20884292ba30b0fe99e28964f0b3b14e7065",
+    "references/migration.md": "f68159ba529379c5506404eedb881bf56840a6f98b447398c1b9235e0cc734f1",
+    "scripts/check_docs.py": "5340fc8d7bbb6d2b3573a9fb16348f35d135e346f571006c0ba59ed6c9b90c47",
+    "templates/decision.md": "3aa53e9d34f2cc258ff5c6c3577c6ebc728297adc749bfd72ff238d0438b535a"
+  }
+}

@@ -15,6 +15,8 @@
 //!
 //! 严重度阈值复用既有 [`severity_for`]，不在此处另立阈值配置。
 
+pub mod tolerance;
+
 use app_model::{AnalysisFrameDto, PlayerColor, ProblemMarkerDto, ProblemSeverity};
 use std::cmp::Reverse;
 use std::collections::HashSet;

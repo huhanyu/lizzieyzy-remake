@@ -1,0 +1,21 @@
+name: doc-governance
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  docs:
+    name: Documentation governance
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Test installer and Git hook contracts
+        run: python3 -m unittest discover -s tools/doc-governance/tests -v
+      - name: Check managed documentation
+        run: python3 .agents/skills/project-doc-governance/scripts/check_docs.py --root . --managed

@@ -1,0 +1,1229 @@
+{
+  "archive_sha256": "88f4e6a5d9e029e5bb596129af3833faae36e0bdca6d91e7b7255b2270729c33",
+  "entries": [
+    {
+      "source": "docs/AGENTS.md",
+      "source_sha256": "f968bbe1942b24ea6613edb3924232d1be9d99dc63992894ab6f5f39a0cfb180",
+      "scope": "all sections / complete file",
+      "action": "rewrite",
+      "destination": "docs/AGENTS.md",
+      "reason": "Current entry simplified; original complete text retained in archive. Current scope described in archive README.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/AGENT_EXECUTION_SUMMARY.md",
+      "source_sha256": "009574eb87e652edf3a1e44d546182a198b95ed37283da58b7946eb3862df4d8",
+      "scope": "all sections / complete file",
+      "action": "archive",
+      "destination": "docs/archive/2026-10-04-docs-before-cleanup.tar.gz::docs/AGENT_EXECUTION_SUMMARY.md",
+      "reason": "Historical handoff, dated validation, research or superseded status; all sections preserved byte-for-byte.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/ARCHITECTURE_NEXT.md",
+      "source_sha256": "e41f208dba0c897cd61ba3c7a4ff69b2f9c52007e41c5e2270d57348d76db49f",
+      "scope": "all sections / complete file",
+      "action": "rewrite",
+      "destination": "docs/ARCHITECTURE_NEXT.md",
+      "reason": "Current entry simplified; original complete text retained in archive. Current scope described in archive README.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/CODEX_DSH_DELIVERY.md",
+      "source_sha256": "5f5e4131b019c8cfb90f6d1f9e9cd205ea259fa40d6f11dfef2871105abb4ba2",
+      "scope": "all sections / complete file",
+      "action": "archive",
+      "destination": "docs/archive/2026-10-04-docs-before-cleanup.tar.gz::docs/CODEX_DSH_DELIVERY.md",
+      "reason": "Historical handoff, dated validation, research or superseded status; all sections preserved byte-for-byte.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/DEVELOPMENT.md",
+      "source_sha256": "93dec1b2a330fab3b3ae626cdbd77e482e4630c587b60ca0030f97ce989a41ba",
+      "scope": "all sections / complete file",
+      "action": "rewrite",
+      "destination": "docs/DEVELOPMENT.md",
+      "reason": "Current entry simplified; original complete text retained in archive. Current scope described in archive README.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/HANDOVER_TO_CODEX.md",
+      "source_sha256": "d6e1fee898a7f3687ee38e67c6b3d18f56340cab3385fa02e99664b2e83e1232",
+      "scope": "all sections / complete file",
+      "action": "archive",
+      "destination": "docs/archive/2026-10-04-docs-before-cleanup.tar.gz::docs/HANDOVER_TO_CODEX.md",
+      "reason": "Historical handoff, dated validation, research or superseded status; all sections preserved byte-for-byte.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/LEGACY_PARITY_MATRIX.md",
+      "source_sha256": "8ddd0aadc60d430154ab9f7f9ae6a8d45866dc90f4a0136b268741de002db25b",
+      "scope": "all sections / complete file",
+      "action": "move",
+      "destination": "docs/qa/legacy-parity.md",
+      "reason": "Still consumed by parity validator; exact original content preserved.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/MAINTENANCE.md",
+      "source_sha256": "c2b4041e42c0abb08c4f2a92144bbe321a52daf13b1b7403373b97ee8167af75",
+      "scope": "all sections / complete file",
+      "action": "rewrite",
+      "destination": "docs/MAINTENANCE.md",
+      "reason": "Current entry simplified; original complete text retained in archive. Current scope described in archive README.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/MIGRATION_PLAN.md",
+      "source_sha256": "768f25695fc689b9289ea2578869a7d773cd476a345d3b00519139cdc1cb39d2",
+      "scope": "all sections / complete file",
+      "action": "archive",
+      "destination": "docs/archive/2026-10-04-docs-before-cleanup.tar.gz::docs/MIGRATION_PLAN.md",
+      "reason": "Historical handoff, dated validation, research or superseded status; all sections preserved byte-for-byte.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/QA_REPORT.md",
+      "source_sha256": "8d84f35536eae435dfea47d9a15c0d8d14a2b1c86e5d95cab94e52c7c5995dd9",
+      "scope": "all sections / complete file",
+      "action": "archive",
+      "destination": "docs/archive/2026-10-04-docs-before-cleanup.tar.gz::docs/QA_REPORT.md",
+      "reason": "Historical handoff, dated validation, research or superseded status; all sections preserved byte-for-byte.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/README.md",
+      "source_sha256": "26fb8f26bdbbc5a174a42f65d0f3d80c3b7fd9f66858a8510648171ce65ab11f",
+      "scope": "all sections / complete file",
+      "action": "rewrite",
+      "destination": "docs/README.md",
+      "reason": "Current entry simplified; original complete text retained in archive. Current scope described in archive README.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/RELEASE_CHECKLIST.md",
+      "source_sha256": "50a40e522578837835b36fe18b08c75b930e010ef8afc0f6ac09b72069388d93",
+      "scope": "all sections / complete file",
+      "action": "rewrite",
+      "destination": "docs/RELEASE_CHECKLIST.md",
+      "reason": "Current entry simplified; original complete text retained in archive. Current scope described in archive README.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/RELEASE_PROCESS.md",
+      "source_sha256": "30024366f28c7bcb7b1dacc0d4b19263dddd74be5f77e017a6e7b8c3ef201470",
+      "scope": "all sections / complete file",
+      "action": "rewrite",
+      "destination": "docs/RELEASE_PROCESS.md",
+      "reason": "Current entry simplified; original complete text retained in archive. Current scope described in archive README.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/TROUBLESHOOTING.md",
+      "source_sha256": "688a1c5e9d9814cfb44750dc7bed858f13eafa6e12e9be67189e85e7a4165309",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/TROUBLESHOOTING.md",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/engine/cloud-position-sync.md",
+      "source_sha256": "de7245442f8eda188756eb4fff9ea50ac176be0a018afbe3b9ccfd74a0feecfc",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/engine/cloud-position-sync.md",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/images/one-click-setup.jpg",
+      "source_sha256": "6c7f9c6e998c3805c8dbe875c8d37632e8ec70571470c4a33510a6e3f4d2f1f1",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/images/one-click-setup.jpg",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/images/workspace.jpg",
+      "source_sha256": "01798de8688b49d2170a00348ccae8000191bb7888e3bf5092f5091e26df213d",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/images/workspace.jpg",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/implementation/human-game-2026-09-16.md",
+      "source_sha256": "be96134d6d110d14c830df60d534b18d8bb5b141daec64b6aaf2ed5d7bc6d810",
+      "scope": "all sections / complete file",
+      "action": "archive",
+      "destination": "docs/archive/2026-10-04-docs-before-cleanup.tar.gz::docs/implementation/human-game-2026-09-16.md",
+      "reason": "Historical handoff, dated validation, research or superseded status; all sections preserved byte-for-byte.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/maintenance/2026-10-04-adoption.md",
+      "source_sha256": "077ef80cd349ec69ae8af211f9f755056ec48879f227852c11977ecb9cf1b5b6",
+      "scope": "all sections / complete file",
+      "action": "archive",
+      "destination": "docs/archive/2026-10-04-docs-before-cleanup.tar.gz::docs/maintenance/2026-10-04-adoption.md",
+      "reason": "Historical handoff, dated validation, research or superseded status; all sections preserved byte-for-byte.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/qa/.DS_Store",
+      "source_sha256": "c689e566e49b6cfb50c5c2bf0ac54416d1a267fe858802109f4120d13b9cdb8f",
+      "scope": "all sections / complete file",
+      "action": "delete",
+      "destination": null,
+      "reason": "Finder metadata; recoverable from local pre-cleanup backup.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/ANALYSIS_DETAILS_20260914.md",
+      "source_sha256": "92e44fe235cbf78896993da84285cc3a3ed17929f4506325e1bdfab90debaf9b",
+      "scope": "all sections / complete file",
+      "action": "archive",
+      "destination": "docs/archive/2026-10-04-docs-before-cleanup.tar.gz::docs/qa/ANALYSIS_DETAILS_20260914.md",
+      "reason": "Historical handoff, dated validation, research or superseded status; all sections preserved byte-for-byte.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/qa/CLOUD_POSITION_LATENCY_20260927.md",
+      "source_sha256": "a1bcf54fca8576bc5fa12d9db10dfbfeceeae2af99d3c2601f0f09f0006a13b3",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/CLOUD_POSITION_LATENCY_20260927.md",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/qa/CODEX_HOVER_ACCEPTANCE.md",
+      "source_sha256": "2385e383e3dc5ea72fa534e044bd862b94b3b3ab913e8d4f6657bda5b471db0b",
+      "scope": "all sections / complete file",
+      "action": "archive",
+      "destination": "docs/archive/2026-10-04-docs-before-cleanup.tar.gz::docs/qa/CODEX_HOVER_ACCEPTANCE.md",
+      "reason": "Historical handoff, dated validation, research or superseded status; all sections preserved byte-for-byte.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/qa/CODEX_LIVE_REVIEW_ACCEPTANCE.md",
+      "source_sha256": "13d20f75142d7b911202c77cc0702aef528a107cf3a8ab82c4c4b272e8765dd0",
+      "scope": "all sections / complete file",
+      "action": "archive",
+      "destination": "docs/archive/2026-10-04-docs-before-cleanup.tar.gz::docs/qa/CODEX_LIVE_REVIEW_ACCEPTANCE.md",
+      "reason": "Historical handoff, dated validation, research or superseded status; all sections preserved byte-for-byte.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/qa/CODEX_MENU_ACCEPTANCE.md",
+      "source_sha256": "9d5ce004dc42639b84789a8f389657ada2be7d4c38f792b16af25334b2ac1f1a",
+      "scope": "all sections / complete file",
+      "action": "archive",
+      "destination": "docs/archive/2026-10-04-docs-before-cleanup.tar.gz::docs/qa/CODEX_MENU_ACCEPTANCE.md",
+      "reason": "Historical handoff, dated validation, research or superseded status; all sections preserved byte-for-byte.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/qa/CODEX_THEMES_ACCEPTANCE.md",
+      "source_sha256": "8d43c34d4b429d3d83eec31a3cbc5280972daba80781fbf395ffabaf993d2944",
+      "scope": "all sections / complete file",
+      "action": "archive",
+      "destination": "docs/archive/2026-10-04-docs-before-cleanup.tar.gz::docs/qa/CODEX_THEMES_ACCEPTANCE.md",
+      "reason": "Historical handoff, dated validation, research or superseded status; all sections preserved byte-for-byte.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/qa/MIGRATION_20260914_STATUS.md",
+      "source_sha256": "d0eefed0b1940325151c82cf399591df46d1d9939577679ae70ac575c5c0fde3",
+      "scope": "all sections / complete file",
+      "action": "archive",
+      "destination": "docs/archive/2026-10-04-docs-before-cleanup.tar.gz::docs/qa/MIGRATION_20260914_STATUS.md",
+      "reason": "Historical handoff, dated validation, research or superseded status; all sections preserved byte-for-byte.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/qa/ONE_CLICK_SETUP_20260915.md",
+      "source_sha256": "139c1460d7f4830342747137033b419fea93cc46bebcd6790d4cca5f393d74a5",
+      "scope": "all sections / complete file",
+      "action": "archive",
+      "destination": "docs/archive/2026-10-04-docs-before-cleanup.tar.gz::docs/qa/ONE_CLICK_SETUP_20260915.md",
+      "reason": "Historical handoff, dated validation, research or superseded status; all sections preserved byte-for-byte.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/qa/P1_ACCEPTANCE_20260914.md",
+      "source_sha256": "b4752de12fd1a93e62c5c7eb4893a7e21a8404d903e0b00ec53a5c5881c818f0",
+      "scope": "all sections / complete file",
+      "action": "archive",
+      "destination": "docs/archive/2026-10-04-docs-before-cleanup.tar.gz::docs/qa/P1_ACCEPTANCE_20260914.md",
+      "reason": "Historical handoff, dated validation, research or superseded status; all sections preserved byte-for-byte.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/qa/P1_ENGINE_CONTROLS_20260914.md",
+      "source_sha256": "e14c4d2d4d0636ce0810d709a207e0b0de9fc8a025aa04d4139f8b5038f3c820",
+      "scope": "all sections / complete file",
+      "action": "archive",
+      "destination": "docs/archive/2026-10-04-docs-before-cleanup.tar.gz::docs/qa/P1_ENGINE_CONTROLS_20260914.md",
+      "reason": "Historical handoff, dated validation, research or superseded status; all sections preserved byte-for-byte.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/qa/P1_ENGINE_REAL_20260914.json",
+      "source_sha256": "3df0f6dc8401acc3e8db0c64ad3ba1585e25ddb8dad272f09baed0f8be2db88b",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/P1_ENGINE_REAL_20260914.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/P2_ACCEPTANCE_20260914.md",
+      "source_sha256": "e01a9a3101c56be8e0e41fdc00b39fdb796d07212c27b665a9fe238453b6c925",
+      "scope": "all sections / complete file",
+      "action": "archive",
+      "destination": "docs/archive/2026-10-04-docs-before-cleanup.tar.gz::docs/qa/P2_ACCEPTANCE_20260914.md",
+      "reason": "Historical handoff, dated validation, research or superseded status; all sections preserved byte-for-byte.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/qa/P2_ENGINE_TOOLS_20260914.md",
+      "source_sha256": "dfb52bef54a748e21693b0f105476ad2b6502e19fbe4a0698bb41a9d2e884756",
+      "scope": "all sections / complete file",
+      "action": "archive",
+      "destination": "docs/archive/2026-10-04-docs-before-cleanup.tar.gz::docs/qa/P2_ENGINE_TOOLS_20260914.md",
+      "reason": "Historical handoff, dated validation, research or superseded status; all sections preserved byte-for-byte.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/qa/P2_RESEARCH.md",
+      "source_sha256": "df91ab5b0e836d6b56602cd86e0a9262f1c744eaeaeb2236b023aeafbc63ea09",
+      "scope": "all sections / complete file",
+      "action": "archive",
+      "destination": "docs/archive/2026-10-04-docs-before-cleanup.tar.gz::docs/qa/P2_RESEARCH.md",
+      "reason": "Historical handoff, dated validation, research or superseded status; all sections preserved byte-for-byte.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/qa/PACKAGE_GUI_ACCEPTANCE_20260914.md",
+      "source_sha256": "e5892359dcd016db5e5aa75a505a4cf8fd284c84d03ee7e5fb72603a2642ff24",
+      "scope": "all sections / complete file",
+      "action": "archive",
+      "destination": "docs/archive/2026-10-04-docs-before-cleanup.tar.gz::docs/qa/PACKAGE_GUI_ACCEPTANCE_20260914.md",
+      "reason": "Historical handoff, dated validation, research or superseded status; all sections preserved byte-for-byte.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/qa/PARALLEL_CURVE_20260915.md",
+      "source_sha256": "4fdd2f97727c70ee2273cec797497d450362fc46f7c101449543ca215f09d8fb",
+      "scope": "all sections / complete file",
+      "action": "archive",
+      "destination": "docs/archive/2026-10-04-docs-before-cleanup.tar.gz::docs/qa/PARALLEL_CURVE_20260915.md",
+      "reason": "Historical handoff, dated validation, research or superseded status; all sections preserved byte-for-byte.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/qa/ZHIZI_VIP_ACCEPTANCE.md",
+      "source_sha256": "0c23225e0c7ba2406cf9974d7e9cc94e9dfc508fa4246043b06fa6f08f37d2df",
+      "scope": "all sections / complete file",
+      "action": "archive",
+      "destination": "docs/archive/2026-10-04-docs-before-cleanup.tar.gz::docs/qa/ZHIZI_VIP_ACCEPTANCE.md",
+      "reason": "Historical handoff, dated validation, research or superseded status; all sections preserved byte-for-byte.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/qa/cloud-new-models.md",
+      "source_sha256": "12b9fc0a55d20d511547a3b90e3478fd094f2c4b353fb77c8bee8ff8fee4147f",
+      "scope": "all sections / complete file",
+      "action": "archive",
+      "destination": "docs/archive/2026-10-04-docs-before-cleanup.tar.gz::docs/qa/cloud-new-models.md",
+      "reason": "Historical handoff, dated validation, research or superseded status; all sections preserved byte-for-byte.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/qa/codex-live-review-evidence/delivery-sha256.json",
+      "source_sha256": "44f2f90ee24aa29e067c0dd7e0aea62899231fd63c37f2e76618069f5419d80e",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/codex-live-review-evidence/delivery-sha256.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/codex-live-review-evidence/engine-probe.json",
+      "source_sha256": "a6872c98d2bee854978954bcf28f8618b9da9254cbf7569cd8d9394cfc8f7015",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/codex-live-review-evidence/engine-probe.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/codex-live-review-evidence/engine-stream-19.json",
+      "source_sha256": "a3b6ec190f4583b3a7e7f4cd4c718ce4efa3077dd01f6823d6d011cb97775bd9",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/codex-live-review-evidence/engine-stream-19.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/codex-live-review-evidence/final-rust-tests.log",
+      "source_sha256": "d43f9e01992f1c3150895f4462690a80b2aaccaade94f5da700b73befa50c734",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/codex-live-review-evidence/final-rust-tests.log",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/codex-live-review-evidence/handicap-branches-9x9.sgf",
+      "source_sha256": "9f9d6fb36bb4c3aa76ca3cfa6daa9afe4db3971c29ced8bfb5733d643a29b5f8",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/codex-live-review-evidence/handicap-branches-9x9.sgf",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/codex-live-review-evidence/native-round1.json",
+      "source_sha256": "50901d519d995a7caaea5877cf2b794b767802d8bec5460255385f73c48e708c",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/codex-live-review-evidence/native-round1.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/codex-live-review-evidence/native-round2-summary.json",
+      "source_sha256": "4845558e5356477546934587cd6ce59cc23ab62154300c50df9343a653d9c488",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/codex-live-review-evidence/native-round2-summary.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/codex-live-review-evidence/native-round2.json",
+      "source_sha256": "82fb665a3505bfa1a7cee3113cd005381083dd6efb2a69400ccae6f0932e9727",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/codex-live-review-evidence/native-round2.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/codex-live-review-evidence/native-round3.json",
+      "source_sha256": "8dc8c8b930a41b7b5e59aa0cdbcb2795dafef0568ab766ffbbd6cd6554a33d4b",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/codex-live-review-evidence/native-round3.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/codex-live-review-evidence/native-round4.json",
+      "source_sha256": "90153a8ceb27c5f504882b3f2e6d2b278c4988924f947e40fcfd3bf6241ab491",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/codex-live-review-evidence/native-round4.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/codex-live-review-evidence/perspective-boundary.json",
+      "source_sha256": "71ac66e9b32aa3cbcfbb99244f88a8f01ec1c0cd0724b9b9b18cecc3e8a5d3d0",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/codex-live-review-evidence/perspective-boundary.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/desktop-sgf-editing-ux-smoke-macos.json",
+      "source_sha256": "c39ea50d84b8991696a4e164a6503fd2ef2b28952cc48854bb1c4fa56b83684c",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/desktop-sgf-editing-ux-smoke-macos.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/desktop-ui-click-smoke-macos.json",
+      "source_sha256": "27781cc2aa9b53e2af89acb8d017afe7cfd1f4b85aa182a73aa47f9e80557cf6",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/desktop-ui-click-smoke-macos.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/evidence/one-click-setup/frontend-tests.log",
+      "source_sha256": "7601c589d9bc0e3eed75add343e447edbf36334319c33a40bf95188f40b89b07",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/evidence/one-click-setup/frontend-tests.log",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/evidence/one-click-setup/native-benchmark-verification.json",
+      "source_sha256": "9cba9300c8dcb9bbe2c140850b6fb38b03cecd75901a79e250dfd032961f313e",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/evidence/one-click-setup/native-benchmark-verification.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/evidence/one-click-setup/native-configured.jpg",
+      "source_sha256": "2e4ba66c026458360e84e9deac16070875f58f137ea2e794f3b7625060f932fe",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/evidence/one-click-setup/native-configured.jpg",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/evidence/one-click-setup/native-download-verification.json",
+      "source_sha256": "0bf7c965a0ba048a032aea757d9c7876a0cce0395e37139e7be9e24a0e82fb75",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/evidence/one-click-setup/native-download-verification.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/evidence/one-click-setup/native-final.jpg",
+      "source_sha256": "6c7f9c6e998c3805c8dbe875c8d37632e8ec70571470c4a33510a6e3f4d2f1f1",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/evidence/one-click-setup/native-final.jpg",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/evidence/one-click-setup/overview-1280.jpg",
+      "source_sha256": "3ec7cd2120c7cd7a0dec76c002d62636d3bcf603698093441d67ed059d50f681",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/evidence/one-click-setup/overview-1280.jpg",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/evidence/one-click-setup/overview-640.jpg",
+      "source_sha256": "a9952bec48ce5d8774e4d231488b0c0346fef43945df2ab223e7168466b499b7",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/evidence/one-click-setup/overview-640.jpg",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/evidence/one-click-setup/overview-browser.jpg",
+      "source_sha256": "e4267e4ae770941db46e808541b31f3b39393faf0422f36541b843c783dafc63",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/evidence/one-click-setup/overview-browser.jpg",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/evidence/one-click-setup/production-build.log",
+      "source_sha256": "d7ad5c3412a10f1202609ab3ea3955016e8deceb4ae48ebfb0b382b0467b9eca",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/evidence/one-click-setup/production-build.log",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/evidence/one-click-setup/profile-before-qa.json",
+      "source_sha256": "71abf34ff935b192aa0d5a2bb80da7465429115d36a5d76921c27c337425a4c3",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/evidence/one-click-setup/profile-before-qa.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/evidence/one-click-setup/rust-tests.log",
+      "source_sha256": "cafddb5915aa6d5f62dff421d04d59413afcd574f09745faa0808255fcb15afc",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/evidence/one-click-setup/rust-tests.log",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/evidence/one-click-setup/tauri-qa.json",
+      "source_sha256": "e0a1a382e23e7b5cd6ca90b967731d111ba03ae8d7cc3e2c33afb57f98c4cd49",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/evidence/one-click-setup/tauri-qa.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/evidence/p2-research/a.request.jsonl",
+      "source_sha256": "26c940e3c04fa3f60f4f1e4371d3e52c68874a46f08acbc210e96ede2d4f7841",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/evidence/p2-research/a.request.jsonl",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/evidence/p2-research/a.sgf",
+      "source_sha256": "386759a8dbd423bbb71b2970f27968297108584eaf141fb9a2b79d2c96256a5b",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/evidence/p2-research/a.sgf",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/evidence/p2-research/a.stderr.txt",
+      "source_sha256": "2ca7f4ff567fbde3d43daa7e968656366c07e1a3445a9befa51843d1689a70d7",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/evidence/p2-research/a.stderr.txt",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/evidence/p2-research/a.stdout.jsonl",
+      "source_sha256": "b71f62c078f221cbf59d7bb4e3442b7652ebb0f59beba081c9ef884e58bda678",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/evidence/p2-research/a.stdout.jsonl",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/evidence/p2-research/analysis.cfg",
+      "source_sha256": "f56fce7a93fa84de710eb20ebf80ac00497e57555f0f45a7e0dd617e0b1590ce",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/evidence/p2-research/analysis.cfg",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/evidence/p2-research/b.request.jsonl",
+      "source_sha256": "561d12ac66df9a5836df8e1da28a6774f3c307b7ecc6db31c8448f5743ad914f",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/evidence/p2-research/b.request.jsonl",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/evidence/p2-research/b.sgf",
+      "source_sha256": "0bab07d4cf323a44e9ca3dc039b2272109982c9884f397e67eb65f68189874e1",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/evidence/p2-research/b.sgf",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/evidence/p2-research/b.stderr.txt",
+      "source_sha256": "0957f00a4a23dc659dc673c6a27dafb9d419c859faf3123c95c262522b228ee2",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/evidence/p2-research/b.stderr.txt",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/evidence/p2-research/b.stdout.jsonl",
+      "source_sha256": "c65702cbc3a998631cba89b9d4b62c9e75333177fa2434ca059f5693676722cb",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/evidence/p2-research/b.stdout.jsonl",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/evidence/p2-research/run_protocol_check.py",
+      "source_sha256": "2adb20436fb27fab954119ac1ba7c64f32a760b72d3e834e195df10b0ba948d3",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/evidence/p2-research/run_protocol_check.py",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/evidence/p2-research/summary.json",
+      "source_sha256": "ee8df15fe6a6d940a4f034946925b838f9871536b3efce47468b271804c03aa5",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/evidence/p2-research/summary.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/evidence/parallel-curve/build.log",
+      "source_sha256": "ef2b386e7f0a5705221b1c1291e1fb12a6c81c4e467d79dc4886d820aa30b1ae",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/evidence/parallel-curve/build.log",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/evidence/parallel-curve/frontend-tests.log",
+      "source_sha256": "1ec336d2568e7de4baf4b8cd76f353a31358b6f88a2467a2284ac063ab99229b",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/evidence/parallel-curve/frontend-tests.log",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/evidence/parallel-curve/real-engine.log",
+      "source_sha256": "a7500149d03c2531b9bdd83e6f6fbfed894c346444eb10582b1d1db47009d0c4",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/evidence/parallel-curve/real-engine.log",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/evidence/parallel-curve/rust-tests.log",
+      "source_sha256": "cb07092bf2b956b63ac2176189e53e01c0d6127981a46e9c320f732663fd1381",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/evidence/parallel-curve/rust-tests.log",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/fixtures/readboard-controlled-board.png",
+      "source_sha256": "70cfecf5b5d5235e66a051c5208c2974fde34f0a28aaef5be33fcd8bc0f63d96",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/fixtures/readboard-controlled-board.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/installed-app-katago-live-workflow-macos.json",
+      "source_sha256": "bc158617b279e93d5f41c9305bb998e7c40e21debb98102d73216a8cc089fce0",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/installed-app-katago-live-workflow-macos.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/installed-app-runtime-workflow-macos.json",
+      "source_sha256": "ccdd9223599bffafe4829146adb3807caec12f6a59a8b657809f8a5639e0bbd0",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/installed-app-runtime-workflow-macos.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/installed-app-sgf-workflow-macos.json",
+      "source_sha256": "87035308ce8fe5d4d146afe91f04d93f5dd44f07cc9f4adbe753af23ae6d6075",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/installed-app-sgf-workflow-macos.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/installed-macos-app-smoke.json",
+      "source_sha256": "d72ce61561b505133869aba4890aac4dfd6afe3007b01ec1e6d89045f31431ef",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/installed-macos-app-smoke.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/katago-live-desktop-workflow-smoke-macos.json",
+      "source_sha256": "b18809ee5044680c7ca70125d885a158ca834214ea30930e497484fc85641d17",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/katago-live-desktop-workflow-smoke-macos.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/katago-live-smoke-macos.json",
+      "source_sha256": "375ad8851050d3d9120097754564f4689848aa6163e85bddacff8a10ed65c47b",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/katago-live-smoke-macos.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/katago-review-workflow-ux-smoke-macos.json",
+      "source_sha256": "5385a4c7fa532ef79cb5f85de38fcb5b2a5487d199d7a69b1e161038402af221",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/katago-review-workflow-ux-smoke-macos.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/katago-tauri-runtime-smoke-macos.json",
+      "source_sha256": "e76cdbc7ced5dd6bc725c524284e79c7c3c526a329cf24c8587bcf3a13902678",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/katago-tauri-runtime-smoke-macos.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/legacy-config-corpus-migration-smoke.json",
+      "source_sha256": "3f00df2d5e4c4e57becd712d066c725b9dec64761fe569c72baf72e9dc470545",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/legacy-config-corpus-migration-smoke.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/legacy-layout-parity-smoke-macos.json",
+      "source_sha256": "6ba3de8f2d9a95aab9ae4abe83bb8a192fc418913e457365ad2502d3d5394116",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/legacy-layout-parity-smoke-macos.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/legacy-shortcut-layout-evidence-macos.json",
+      "source_sha256": "8bbcf8c3fd5e5e6edd83366446b1ae17e25bc376e5818ecab1bdab7da9ddd18d",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/legacy-shortcut-layout-evidence-macos.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/multiplatform-packaging-smoke.json",
+      "source_sha256": "2bccf843c69027f34a3787f75fe205bccb10b5719447ef836b7c02b4c5de5939",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/multiplatform-packaging-smoke.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/native-desktop-sgf-workflow-macos.json",
+      "source_sha256": "ef1ab08dd507a38ca256f894524c6653dd19ec0fe472698a116ba6be4205d5d2",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/native-desktop-sgf-workflow-macos.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/native-menu-shortcut-smoke-macos.json",
+      "source_sha256": "6b015208701018a0550423cab70bd6ca5de69335f62d2bb264545cbb45869912",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/native-menu-shortcut-smoke-macos.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/provider-live-smoke-macos.json",
+      "source_sha256": "d7cbad54059932bb9e0759217141ffc9215b59c3bba5a962cb5b8d8a6955f3dc",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/provider-live-smoke-macos.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/readboard-image-import-smoke-macos.json",
+      "source_sha256": "496addcdf561cdf08f73fd1321e3edd32f64b9688ad779ec94236469bdfbd206",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/readboard-image-import-smoke-macos.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/readboard-image-ocr-corpus-smoke-macos.json",
+      "source_sha256": "4a1b001c23597675495def2219f58c886a4cebffdb653309701bd71208e25a7f",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/readboard-image-ocr-corpus-smoke-macos.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/readboard-tauri-runtime-smoke-macos.json",
+      "source_sha256": "80d32446f5a4c270d90314f10992d4328ac3b25ce9ef091042303cb4eefeb914",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/readboard-tauri-runtime-smoke-macos.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/app-running-window-t3.png",
+      "source_sha256": "608f335199d8fa9557856cfd90d6f18b81f3ec367c70d7f1af9d766fddea7ceb",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/app-running-window-t3.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/desktop-ui-click-after-clicks.png",
+      "source_sha256": "5cdfe7a44c3a69b2bec1fadbadd99b9717f0054c557b48163ce5092c63235060",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/desktop-ui-click-after-clicks.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/desktop-ui-click-initial.png",
+      "source_sha256": "1c42b37133b3d34c5b00668a62091f525c4936d0dd5458cd9c2dd1587215ba26",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/desktop-ui-click-initial.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/installed-macos-app-window.png",
+      "source_sha256": "fff9048fa026b5f3869f20f3f24023ed791d62b2bb580d24e6fa6f661cfafc35",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/installed-macos-app-window.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/legacy-layout-desktop-1280x840-default-review-layout.png",
+      "source_sha256": "bccb0087018813bed5d1eec60db3ab27e7ed9211844512bf25d85134b47c3ec1",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/legacy-layout-desktop-1280x840-default-review-layout.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/legacy-layout-desktop-1280x840-engine-preferences-layout.png",
+      "source_sha256": "83c63fbf3f313ef07243f1d78bcee0537d6c01d9e98709d9199ca75e5ed58f9e",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/legacy-layout-desktop-1280x840-engine-preferences-layout.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/legacy-layout-desktop-1280x840-katago-analysis-layout.png",
+      "source_sha256": "f4af38029c1bd933d206cbcf3cdb43c287818381acf138852f5445c2ca473125",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/legacy-layout-desktop-1280x840-katago-analysis-layout.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/legacy-layout-desktop-1280x840-provider-readboard-layout.png",
+      "source_sha256": "74571a9a6b481fafd1ea58e27c505e2986e68c2364b641d1d42531f4c591cd0c",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/legacy-layout-desktop-1280x840-provider-readboard-layout.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/legacy-layout-desktop-1280x840-sgf-editing-layout.png",
+      "source_sha256": "6701e603accee26ec0d0e5dc41136024c045a14e1b27f32d7bfa19851389ae64",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/legacy-layout-desktop-1280x840-sgf-editing-layout.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/legacy-layout-narrow-desktop-960x840-default-review-layout.png",
+      "source_sha256": "344a76d4ccc165eba99bbeca7d48c329e88feb2063760b60720f6ce18af0e3c0",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/legacy-layout-narrow-desktop-960x840-default-review-layout.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/legacy-layout-narrow-desktop-960x840-engine-preferences-layout.png",
+      "source_sha256": "09e16fd8d2f6f7f89e7612ba3431dd514fc7ba249277eadb8629536afa4cb44f",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/legacy-layout-narrow-desktop-960x840-engine-preferences-layout.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/legacy-layout-narrow-desktop-960x840-katago-analysis-layout.png",
+      "source_sha256": "09874ed85dd2746805acd621a283e14f2e7410c6e0db08bd768d43ae6dec3fab",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/legacy-layout-narrow-desktop-960x840-katago-analysis-layout.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/legacy-layout-narrow-desktop-960x840-provider-readboard-layout.png",
+      "source_sha256": "53cf4f4431cb6040270c3368187b4c886762f097cafffded3153de888f0ea623",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/legacy-layout-narrow-desktop-960x840-provider-readboard-layout.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/legacy-layout-narrow-desktop-960x840-sgf-editing-layout.png",
+      "source_sha256": "ca86f265cddc516e453025bf56867c8ed9c9c0220eea62ba0e3fabc2927eebd3",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/legacy-layout-narrow-desktop-960x840-sgf-editing-layout.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/legacy-layout-short-window-1280x620-default-review-layout.png",
+      "source_sha256": "5e569403fb3c620bc89abcadc8599a4439ddd72c209f83897b46efe08aff3c66",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/legacy-layout-short-window-1280x620-default-review-layout.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/legacy-layout-short-window-1280x620-engine-preferences-layout.png",
+      "source_sha256": "24258965e1fee77b5070816789e67dac326bcd3fd7d47a2c5a5265afde08411c",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/legacy-layout-short-window-1280x620-engine-preferences-layout.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/legacy-layout-short-window-1280x620-katago-analysis-layout.png",
+      "source_sha256": "b9a2880ac90e3308043f691826cd6086fc2f944ef1b0f41d08188ebb33e2285d",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/legacy-layout-short-window-1280x620-katago-analysis-layout.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/legacy-layout-short-window-1280x620-provider-readboard-layout.png",
+      "source_sha256": "43421e1952faf34d62512cf1fb84b08414af1ff428c76d11c14590caad61a463",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/legacy-layout-short-window-1280x620-provider-readboard-layout.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/legacy-layout-short-window-1280x620-sgf-editing-layout.png",
+      "source_sha256": "6fdf7e0e67b142bd92d6b94d2867708432e860ad545f05a09c1bb03d9785bfa8",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/legacy-layout-short-window-1280x620-sgf-editing-layout.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/native-desktop-sgf-app-started.png",
+      "source_sha256": "94210fd911a1efd417fd2ad4c1f0037985b8e0421c6df9ea3a79392cba4cd1e7",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/native-desktop-sgf-app-started.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/native-desktop-sgf-open-dialog.png",
+      "source_sha256": "e080afad4847eb2f77b5dffd3d0b3bb63f869f64fe876f7de41fd18570ce5a68",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/native-desktop-sgf-open-dialog.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/native-desktop-sgf-opened.png",
+      "source_sha256": "cc0912f3f0d701d5f4c96f5730eb588715ad12b1ef77d3e67a1a0129a564cdca",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/native-desktop-sgf-opened.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/native-desktop-sgf-reopen-dialog.png",
+      "source_sha256": "c4b0712d670a6d68a4cafb4fab3c58d7eb8aabf14ea8328843234aaf414857d1",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/native-desktop-sgf-reopen-dialog.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/native-desktop-sgf-reopened.png",
+      "source_sha256": "d80f326cf7a6fc34c1cd19c50b628abaf22206bc4dc3f18d1766cf3a47226136",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/native-desktop-sgf-reopened.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/native-desktop-sgf-save-dialog.png",
+      "source_sha256": "73e3f6ef107abec0f8014ca26b9d9e4e4158dca65d8f514d2644fa4691b3eb83",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/native-desktop-sgf-save-dialog.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/native-desktop-sgf-saved.png",
+      "source_sha256": "8049d5849ad831aef063a11116ad50c5aef78a1c091d8272a31b02820c536724",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/native-desktop-sgf-saved.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/tauri-window-runtime-smoke.png",
+      "source_sha256": "f0731971b0dd93513a5d103e18c96aa275495d814e2ac5940c5af59481cab3ba",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/tauri-window-runtime-smoke.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/ui-redesign-1.png",
+      "source_sha256": "b2f963055301e77b2f8cfa444856e182cf8cc7699df6bdd4b950fe455bfe0953",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/ui-redesign-1.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/ui-redesign-2.png",
+      "source_sha256": "49175208d30e9aae795978ef40b8d1d3935365be1239daffb61b2a80319a6024",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/ui-redesign-2.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/screenshots/ui-redesign-3.png",
+      "source_sha256": "a8b7f72179f8bafdefdf0741d23f14b5d86a3e0b4bf18131117db060be383f21",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/screenshots/ui-redesign-3.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/selected-design/design-qa-before-setup.md",
+      "source_sha256": "1f3e4838fd3a3fd4c36734936afebf6776f81206cf78b5217722ab14829b8729",
+      "scope": "all sections / complete file",
+      "action": "archive",
+      "destination": "docs/archive/2026-10-04-docs-before-cleanup.tar.gz::docs/qa/selected-design/design-qa-before-setup.md",
+      "reason": "Historical handoff, dated validation, research or superseded status; all sections preserved byte-for-byte.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/qa/selected-design/desktop.png",
+      "source_sha256": "f7ec7ce4b9cd15b92b170ef80445b7102e964cae20b324669ee379ea6d0cb630",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/selected-design/desktop.png",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/tauri-runtime-ui-smoke-macos.json",
+      "source_sha256": "07886472a0ea8fb3d70193498a38aba0d6985915f05cd5f0fa77468a1a3ba447",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/tauri-runtime-ui-smoke-macos.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/tauri-webview-dom-click-smoke-macos.json",
+      "source_sha256": "af7e65e20de1a5ce23e6e7f8795191cc1cb933c33ad31bb5e3557170ca6e4038",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/tauri-webview-dom-click-smoke-macos.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/qa/tauri-window-runtime-smoke-macos.json",
+      "source_sha256": "87ee96e25e9222f01957039abc79f0ed443b7157f2c4cb17a2e9637d33210936",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/qa/tauri-window-runtime-smoke-macos.json",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/research/zhangqi-review-modules.md",
+      "source_sha256": "4d0b78042019575d25393f80fc3ab485caed99d2bdf968751ef2615977940914",
+      "scope": "all sections / complete file",
+      "action": "archive",
+      "destination": "docs/archive/2026-10-04-docs-before-cleanup.tar.gz::docs/research/zhangqi-review-modules.md",
+      "reason": "Historical handoff, dated validation, research or superseded status; all sections preserved byte-for-byte.",
+      "original_in_archive": true
+    },
+    {
+      "source": "docs/validation/StrengthAggregateParity.java.txt",
+      "source_sha256": "3d89ff9941aa86fe6a9b27f1b922ab60cd6c0364be5507eeddd894094ffbb6c0",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/validation/StrengthAggregateParity.java.txt",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/validation/StrengthScorerParity.java.txt",
+      "source_sha256": "9f4c8f1258f63fb3881014c17260c5605fbab680b9abf4ff2568c17526e9b1de",
+      "scope": "all sections / complete file",
+      "action": "retain",
+      "destination": "docs/validation/StrengthScorerParity.java.txt",
+      "reason": "Existing asset/evidence or module documentation retained in place.",
+      "original_in_archive": false
+    },
+    {
+      "source": "docs/validation/review-modules-2026-09-15.md",
+      "source_sha256": "cd0d72662e82b93a01d4346c4f44bda3a3ba28de857219c34e56dd1e646bb566",
+      "scope": "all sections / complete file",
+      "action": "archive",
+      "destination": "docs/archive/2026-10-04-docs-before-cleanup.tar.gz::docs/validation/review-modules-2026-09-15.md",
+      "reason": "Historical handoff, dated validation, research or superseded status; all sections preserved byte-for-byte.",
+      "original_in_archive": true
+    }
+  ]
+}

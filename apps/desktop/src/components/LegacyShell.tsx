@@ -52,6 +52,7 @@ type LegacyShellProps = {
   maxMove: number;
   message: string;
   isBusy: boolean;
+  navigationBusy?: boolean;
   canSave: boolean;
   onlineKifu?: ReactNode;
   onOpen: () => void | Promise<void>;
@@ -143,6 +144,7 @@ export function LegacyShell({
   maxMove,
   message,
   isBusy,
+  navigationBusy = isBusy,
   canSave,
   onlineKifu,
   onOpen,
@@ -263,7 +265,7 @@ export function LegacyShell({
   const workspaceRef = useRef<HTMLElement | null>(null);
   useWorkspaceGeometry(workspaceRef, showMoveTree);
   const boardPaneRef = useRef<HTMLDivElement | null>(null);
-  useBoardWheel(boardPaneRef, currentMove, maxMove, isBusy, onMoveChange);
+  useBoardWheel(boardPaneRef, currentMove, maxMove, navigationBusy, onMoveChange);
   const analysisPaneRef = useRef<HTMLDivElement | null>(null);
   const bottomDockRef = useRef<HTMLElement | null>(null);
   useEffect(() => {

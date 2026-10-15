@@ -109,10 +109,16 @@ mod tests {
     }
     #[test]
     fn remote_command_keeps_server_config_without_local_tuning() {
-        let spec=ssh_spec(&config()).unwrap();
-        let command=spec.args.last().unwrap();
+        let spec = ssh_spec(&config()).unwrap();
+        let command = spec.args.last().unwrap();
         assert!(command.contains("-config '/configs/gtp.cfg'"));
-        for local_key in ["numSearchThreads", "nnMaxBatchSize", "numNNServerThreads", "analysisWideRootNoise", "playoutDoublingAdvantage"] {
+        for local_key in [
+            "numSearchThreads",
+            "nnMaxBatchSize",
+            "numNNServerThreads",
+            "analysisWideRootNoise",
+            "playoutDoublingAdvantage",
+        ] {
             assert!(!command.contains(local_key));
         }
     }

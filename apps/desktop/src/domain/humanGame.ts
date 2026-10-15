@@ -1,4 +1,5 @@
 import type { MoveVertex } from "./types";
+import type { ReviewConfig } from "./tolerance/types";
 export type GameMode = "standard" | "human";
 export type GameOptions = {
   source: "local" | "cloud" | "ssh";
@@ -14,6 +15,7 @@ export type GameOptions = {
   komi: number;
   rules: string;
   continuation: boolean;
+  analysisConfig?: ReviewConfig;
 };
 export const defaultGameOptions: GameOptions = {
   source: "local",
